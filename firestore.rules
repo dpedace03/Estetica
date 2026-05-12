@@ -1,0 +1,131 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 0.1 Global Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'dpedace03@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // --- Entity Validations ---
+
+    function isValidClient(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && (!('email' in data) || (data.email is string && data.email.size() <= 255))
+        && (!('phone' in data) || (data.phone is string && data.phone.size() <= 20));
+    }
+
+    function isValidProduct(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 150
+        && data.price is number && data.price >= 0
+        && data.stock is number;
+    }
+
+    function isValidTreatment(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() <= 150
+        && data.price is number && data.price >= 0
+        && data.duration is number && data.duration > 0;
+    }
+
+    function isValidAppointment(data) {
+      return isValidId(data.clientId) && isValidId(data.treatmentId) && isValidId(data.employeeId)
+        && data.date is string && data.startTime is string;
+    }
+
+    function isValidSale(data) {
+      return isValidId(data.clientId) && isValidId(data.employeeId)
+        && data.items is list && data.items.size() > 0
+        && data.total is number && data.total >= 0;
+    }
+
+    // --- Rules ---
+
+    match /clients/{clientId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidClient(incoming());
+      allow update: if isSignedIn() && isValidClient(incoming());
+    }
+
+    match /products/{productId} {
+      allow read: if isSignedIn();
+      allow create, update: if isAdmin();
+    }
+
+    match /treatments/{treatmentId} {
+      allow read: if isSignedIn();
+      allow create, update: if isAdmin();
+    }
+
+    match /appointments/{appointmentId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidAppointment(incoming());
+      allow update: if isSignedIn() && isValidAppointment(incoming()) && (
+        // Only owner or admin or assigned employee
+        request.auth.uid == incoming().employeeId || isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /sales/{saleId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidSale(incoming());
+      // Sales are usually immutable for integrity, but admins can correct
+      allow update: if isAdmin();
+    }
+
+    match /expenses/{expenseId} {
+      allow read, write: if isAdmin();
+    }
+
+    match /employees/{employeeId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /commissions/{commissionId} {
+      allow read: if isSignedIn() && (request.auth.uid == resource.data.employeeId || isAdmin());
+      allow create: if isAdmin(); // Or automated via backend/sale
+      allow update, delete: if isAdmin();
+    }
+
+    match /returns/{returnId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn() && (request.auth.uid == resource.data.recipientId || isAdmin());
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && (request.auth.uid == resource.data.recipientId || isAdmin());
+    }
+
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if false; // Only manageable via Firebase Console or special script
+    }
+  }
+}

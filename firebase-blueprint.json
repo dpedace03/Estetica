@@ -1,0 +1,162 @@
+{
+  "entities": {
+    "Treatment": {
+      "title": "Treatment",
+      "description": "Services offered by the aesthetics center",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "duration": { "type": "number", "description": "Duration in minutes" },
+        "price": { "type": "number" },
+        "category": { "type": "string" }
+      },
+      "required": ["name", "price", "duration"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Physical products sold in the center",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "stock": { "type": "number" },
+        "category": { "type": "string" },
+        "barcode": { "type": "string" }
+      },
+      "required": ["name", "price", "stock"]
+    },
+    "Client": {
+      "title": "Client",
+      "description": "Registered clients of the center",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name"]
+    },
+    "Appointment": {
+      "title": "Appointment",
+      "description": "Scheduled appointments for treatments",
+      "type": "object",
+      "properties": {
+        "clientId": { "type": "string" },
+        "treatmentId": { "type": "string" },
+        "employeeId": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "startTime": { "type": "string" },
+        "endTime": { "type": "string" },
+        "status": { "type": "string", "enum": ["scheduled", "completed", "cancelled"] },
+        "notes": { "type": "string" }
+      },
+      "required": ["clientId", "treatmentId", "employeeId", "date", "startTime"]
+    },
+    "Sale": {
+      "title": "Sale",
+      "description": "Sales records for products and services",
+      "type": "object",
+      "properties": {
+        "clientId": { "type": "string" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "itemId": { "type": "string" },
+              "type": { "type": "string", "enum": ["product", "treatment"] },
+              "name": { "type": "string" },
+              "quantity": { "type": "number" },
+              "price": { "type": "number" }
+            }
+          }
+        },
+        "total": { "type": "number" },
+        "employeeId": { "type": "string" },
+        "paymentMethod": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["clientId", "items", "total", "employeeId", "createdAt"]
+    },
+    "Expense": {
+      "title": "Expense",
+      "description": "Business expenses tracking",
+      "type": "object",
+      "properties": {
+        "description": { "type": "string" },
+        "amount": { "type": "number" },
+        "category": { "type": "string" },
+        "date": { "type": "string", "format": "date" }
+      },
+      "required": ["description", "amount", "date"]
+    },
+    "Employee": {
+      "title": "Employee",
+      "description": "Staff members and therapists",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "role": { "type": "string" },
+        "commissionRate": { "type": "number", "description": "Percentage for commissions" }
+      },
+      "required": ["name", "email"]
+    },
+    "Commission": {
+      "title": "Commission",
+      "description": "Earned commissions for employees",
+      "type": "object",
+      "properties": {
+        "employeeId": { "type": "string" },
+        "saleId": { "type": "string" },
+        "amount": { "type": "number" },
+        "date": { "type": "string", "format": "date-time" }
+      },
+      "required": ["employeeId", "saleId", "amount", "date"]
+    },
+    "Return": {
+      "title": "Return",
+      "description": "History of product returns",
+      "type": "object",
+      "properties": {
+        "saleId": { "type": "string" },
+        "reason": { "type": "string" },
+        "items": { "type": "array" },
+        "totalAmount": { "type": "number" },
+        "date": { "type": "string", "format": "date-time" }
+      },
+      "required": ["saleId", "totalAmount", "date"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Messages sent to clients or employees",
+      "type": "object",
+      "properties": {
+        "recipientId": { "type": "string" },
+        "recipientType": { "type": "string", "enum": ["client", "employee"] },
+        "message": { "type": "string" },
+        "type": { "type": "string" },
+        "sentAt": { "type": "string", "format": "date-time" },
+        "read": { "type": "boolean" }
+      },
+      "required": ["recipientId", "message", "sentAt"]
+    }
+  },
+  "firestore": {
+    "treatments": { "schema": "Treatment", "description": "Offered services" },
+    "products": { "schema": "Product", "description": "Inventory" },
+    "clients": { "schema": "Client", "description": "Customer database" },
+    "appointments": { "schema": "Appointment", "description": "Calendar events" },
+    "sales": { "schema": "Sale", "description": "Revenue records" },
+    "expenses": { "schema": "Expense", "description": "Cost records" },
+    "employees": { "schema": "Employee", "description": "Staff management" },
+    "commissions": { "schema": "Commission", "description": "Payout tracking" },
+    "returns": { "schema": "Return", "description": "Returned sales" },
+    "notifications": { "schema": "Notification", "description": "Communication log" }
+  }
+}
