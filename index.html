@@ -4,170 +4,543 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Lorenzza — Centro de Estética</title>
-  
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@500;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div id="loading-screen" class="overlay">
-    <div class="loader"></div>
-    <p id="loading-msg">Iniciando Lorenzza...</p>
+<div id="loading-screen">
+  <div class="spinner" style="width:42px;height:42px"></div>
+  <h2>Lorenzza</h2>
+  <p id="loading-msg">Iniciando...</p>
+</div>
+
+<div id="login-screen">
+  <div class="login-box">
+    <h1>Lorenzza</h1>
+    <small>CENTRO DE ESTÉTICA</small>
+    <p>Iniciá sesión para acceder al sistema</p>
+    <button class="btn-google" onclick="window.doGoogleLogin()">
+      <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continuar con Google
+    </button>
+  </div>
+</div>
+
+<div class="overlay-mobile" id="mobileOverlay" onclick="closeSidebar()"></div>
+
+<aside id="sidebar">
+  <div class="logo">
+    <h1>Lorenzza</h1>
+    <small>CENTRO DE ESTÉTICA</small>
+  </div>
+  <nav>
+    <div class="nav-section">Principal</div>
+    <div class="nav-item active" data-page="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Panel Principal</div>
+    <div class="nav-item" data-page="appointments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Turnos</div>
+
+    <div class="nav-section">Comercial</div>
+    <div class="nav-item" data-page="sales"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Ventas</div>
+    <div class="nav-item" data-page="expenses"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Gastos</div>
+
+    <div class="nav-section">Catálogo</div>
+    <div class="nav-item" data-page="treatments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>Tratamientos</div>
+    <div class="nav-item" data-page="products"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>Productos</div>
+    <div class="nav-item" data-page="promos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>Promos</div>
+
+    <div class="nav-section">Personas</div>
+    <div class="nav-item" data-page="clients"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Clientes</div>
+    <div class="nav-item" data-page="employees"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Empleados</div>
+    <div class="nav-item" data-page="commissions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>Comisiones</div>
+  </nav>
+  <div id="user-chip-wrap"></div>
+</aside>
+
+<div id="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button id="hamburger" onclick="toggleSidebar()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <h2 id="pageTitle">Panel Principal</h2>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="showConfigModal()">⚙ Firebase</button>
   </div>
 
-  <div id="login-screen" class="overlay hidden">
-    <div class="login-box">
-      <h1 class="brand-romantic">Lorenzza</h1>
-      <p class="subtitle">Configuración de Base de Datos</p>
-      <input type="password" id="cfg-key" placeholder="API Key de Firebase"/>
-      <input type="text" id="cfg-auth" placeholder="Auth Domain"/>
-      <input type="text" id="cfg-db" placeholder="Database URL"/>
-      <input type="text" id="cfg-pid" placeholder="Project ID"/>
-      <button class="btn btn-primary full-width" onclick="saveConfig()">Entrar al Sistema</button>
+  <div class="page active" id="page-dashboard">
+    <div class="dash-filter">
+      <div class="form-group"><label>Desde</label><input type="date" id="dash-date-from" onchange="renderDashboard()"></div>
+      <div class="form-group"><label>Hasta</label><input type="date" id="dash-date-to" onchange="renderDashboard()"></div>
+      <button class="btn btn-ghost btn-sm" onclick="setDashRange('today')">Hoy</button>
+      <button class="btn btn-ghost btn-sm" onclick="setDashRange('week')">Semana</button>
+      <button class="btn btn-ghost btn-sm" onclick="setDashRange('month')">Mes</button>
+      <button class="btn btn-ghost btn-sm" onclick="setDashRange('year')">Año</button>
+      <button class="btn btn-ghost btn-sm" onclick="setDashRange('clear')">Limpiar</button>
+    </div>
+    <div class="grid-4">
+      <div class="stat-card accent"><span class="lbl" id="lbl-sales">Ventas hoy</span><b id="stat-today">$0</b><span class="sub" id="sub-sales">Este día</span></div>
+      <div class="stat-card"><span class="lbl">Ventas mes</span><b id="stat-month">$0</b><span class="sub">Mes actual</span></div>
+      <div class="stat-card danger"><span class="lbl" id="lbl-expenses">Gastos hoy</span><b id="stat-expenses">$0</b><span class="sub" id="sub-expenses">Este día</span></div>
+      <div class="stat-card success"><span class="lbl" id="lbl-result">Resultado</span><b id="stat-result">$0</b><span class="sub">Ventas − Gastos</span></div>
+    </div>
+    <div class="grid-4 mt-20">
+      <div class="stat-card"><span class="lbl" id="lbl-appts">Turnos hoy</span><b id="stat-appts">0</b><span class="sub">Programados</span></div>
+      <div class="stat-card success"><span class="lbl" id="lbl-completed">Cumplidos hoy</span><b id="stat-completed">0</b><span class="sub">Completados</span></div>
+      <div class="stat-card danger"><span class="lbl" id="lbl-cancelled">Cancelados hoy</span><b id="stat-cancelled">0</b><span class="sub">Cancelados</span></div>
+      <div class="stat-card"><span class="lbl">Clientes</span><b id="stat-clients">0</b><span class="sub">Total registrados</span></div>
+    </div>
+    <div class="grid-2 mt-20">
+      <div class="card"><div class="section-title">Turnos próximos</div><div id="dash-appts"><div class="loader"><div class="spinner"></div></div></div></div>
+      <div class="card"><div class="section-title">Stock bajo</div><div id="dash-stock"><div class="loader"><div class="spinner"></div></div></div></div>
+    </div>
+    <div class="grid-2 mt-20">
+      <div class="card"><div class="section-title">Últimas ventas</div><div id="dash-sales"><div class="loader"><div class="spinner"></div></div></div></div>
+      <div class="card"><div class="section-title">Últimos gastos</div><div id="dash-expenses"><div class="loader"><div class="spinner"></div></div></div></div>
     </div>
   </div>
 
-  <aside id="sidebar" style="display:none">
-    <div class="logo-container">
-      <h1 class="brand-romantic">Lorenzza</h1>
-      <small class="tagline">CENTRO DE ESTÉTICA</small>
+  <div class="page" id="page-appointments">
+    <div class="toolbar">
+      <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="appt-search" placeholder="Buscar..." oninput="filterTable('appts-body','appt-search')"></div>
+      <select id="appt-filter-status" onchange="renderAppointments()"><option value="">Todos</option><option value="scheduled">Programado</option><option value="completed">Cumplido</option><option value="cancelled">Cancelado</option></select>
+      <button class="btn btn-primary" onclick="openApptModal()">+ Nuevo Turno</button>
     </div>
-    <nav>
-      <a class="nav-item active" onclick="showView('dash')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        Panel Principal
-      </a>
-      <a class="nav-item" onclick="showView('clients')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Clientes
-      </a>
-      <a class="nav-item" onclick="showView('shifts')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Turnos
-      </a>
-    </nav>
-    <div class="sidebar-footer">
-       <button class="btn btn-logout" onclick="logout()">Cerrar Sesión</button>
+    <div class="card"><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Hora</th><th>Cliente</th><th>Tratamiento</th><th>Empleado</th><th>Estado</th><th>Cambiar</th><th>Acciones</th></tr></thead><tbody id="appts-body"><tr><td colspan="8"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
+  </div>
+
+  <div class="page" id="page-sales">
+    <div class="toolbar">
+      <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="sale-search" placeholder="Buscar..." oninput="filterTable('sales-body','sale-search')"></div>
+      <button class="btn btn-primary" onclick="openSaleModal()">+ Nueva Venta</button>
     </div>
-  </aside>
+    <div class="card"><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Cliente</th><th>Items</th><th>Total</th><th>Pago</th><th>Empleado</th><th></th></tr></thead><tbody id="sales-body"><tr><td colspan="7"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
+  </div>
 
-  <main id="main-content" style="display:none">
-    <header>
-      <h2 id="view-title">Bienvenido</h2>
-    </header>
+  <div class="page" id="page-expenses">
+    <div class="toolbar">
+      <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="exp-search" placeholder="Buscar..." oninput="filterTable('exps-body','exp-search')"></div>
+      <button class="btn btn-primary" onclick="openExpModal()">+ Nuevo Gasto</button>
+    </div>
+    <div class="card"><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Descripción</th><th>Categoría</th><th>Monto</th><th></th></tr></thead><tbody id="exps-body"><tr><td colspan="5"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
+  </div>
 
-    <div id="v-dash" class="view">
-      <div class="stats-grid">
-        <div class="card stat jade">
-          <span>Balance Mensual</span>
-          <b id="dash-balance">$0</b>
-        </div>
-        <div class="card stat sky">
-          <span>Turnos Hoy</span>
-          <b id="dash-shifts">0</b>
-        </div>
-        <div class="card stat">
-          <span>Clientes Totales</span>
-          <b id="dash-clients">0</b>
-        </div>
+  <div class="page" id="page-treatments">
+    <div class="toolbar">
+      <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="treat-search" placeholder="Buscar..." oninput="filterTreatsAll()"></div>
+      <button class="btn btn-primary" onclick="openTreatModal()">+ Nuevo Tratamiento</button>
+    </div>
+    <div id="treats-container"><div class="loader"><div class="spinner"></div>Cargando...</div></div>
+  </div>
+
+  <div class="page" id="page-products">
+    <div class="toolbar">
+      <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="prod-search" placeholder="Buscar..." oninput="filterTable('prods-body','prod-search')"></div>
+      <button class="btn btn-primary" onclick="openProdModal()">+ Nuevo Producto</button>
+    </div>
+    <div class="card"><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Categoría</th><th>Stock</th><th>Precio</th><th>Código</th><th></th></tr></thead><tbody id="prods-body"><tr><td colspan="6"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
+  </div>
+
+  <div class="page" id="page-promos">
+    <div class="toolbar">
+      <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="promo-search" placeholder="Buscar promo..." oninput="filterTable('promos-body','promo-search')"></div>
+      <select id="promo-filter-active" onchange="renderPromos()"><option value="">Todas</option><option value="1">Activas</option><option value="0">Inactivas</option></select>
+      <button class="btn btn-primary" onclick="openPromoModal()">+ Nueva Promo</button>
+    </div>
+    <div class="card"><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Productos incluidos</th><th>Precio</th><th>Estado</th><th></th></tr></thead><tbody id="promos-body"><tr><td colspan="5"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
+  </div>
+
+  <div class="page" id="page-clients">
+    <div class="toolbar">
+      <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="client-search" placeholder="Buscar..." oninput="filterTable('clients-body','client-search')"></div>
+      <button class="btn btn-primary" onclick="openClientModal()">+ Nuevo Cliente</button>
+    </div>
+    <div class="card"><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Notas</th><th>Historial</th><th></th></tr></thead><tbody id="clients-body"><tr><td colspan="6"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
+  </div>
+
+  <div class="page" id="page-employees">
+    <div class="toolbar">
+      <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="emp-search" placeholder="Buscar..." oninput="filterTable('emps-body','emp-search')"></div>
+      <button class="btn btn-primary" onclick="openEmpModal()">+ Nuevo Empleado</button>
+    </div>
+    <div class="card"><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Rol</th><th>Comisión %</th><th></th></tr></thead><tbody id="emps-body"><tr><td colspan="6"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
+  </div>
+
+  <div class="page" id="page-commissions">
+    <div class="toolbar"><div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="comm-search" placeholder="Buscar..." oninput="filterTable('comms-body','comm-search')"></div></div>
+    <div class="card"><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Empleado</th><th>Venta ID</th><th>Monto</th></tr></thead><tbody id="comms-body"><tr><td colspan="4"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
+  </div>
+</div>
+
+<!-- ===== MODALES ===== -->
+<div class="modal-overlay" id="config-modal">
+  <div class="modal">
+    <h3>⚙ Firebase</h3>
+    <div class="form-group"><label>API Key</label><input id="cfg-apiKey"></div>
+    <div class="form-group"><label>Auth Domain</label><input id="cfg-authDomain"></div>
+    <div class="form-group"><label>Project ID</label><input id="cfg-projectId"></div>
+    <div class="form-group"><label>Storage Bucket</label><input id="cfg-storageBucket"></div>
+    <div class="form-group"><label>Messaging Sender ID</label><input id="cfg-messagingSenderId"></div>
+    <div class="form-group"><label>App ID</label><input id="cfg-appId"></div>
+    <div class="form-group"><label>Firestore DB ID <span style="color:var(--text3);font-weight:300;text-transform:none">(vacío = default)</span></label><input id="cfg-dbId"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('config-modal')">Cancelar</button><button class="btn btn-primary" onclick="doSaveConfig()">Conectar</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="appt-modal">
+  <div class="modal">
+    <h3 id="appt-modal-title">Nuevo Turno</h3><input type="hidden" id="appt-id">
+    <div class="form-row"><div class="form-group"><label>Fecha</label><input type="date" id="appt-date"></div><div class="form-group"><label>Hora inicio</label><input type="time" id="appt-start"></div></div>
+    <div class="form-row"><div class="form-group"><label>Hora fin</label><input type="time" id="appt-end"></div><div class="form-group"><label>Estado</label><select id="appt-status"><option value="scheduled">Programado</option><option value="completed">Cumplido</option><option value="cancelled">Cancelado</option></select></div></div>
+    <div class="form-group"><label>Cliente</label><select id="appt-client"><option value="">Seleccionar...</option></select></div>
+    <div class="form-group"><label>Tratamiento</label><select id="appt-treatment"><option value="">Seleccionar...</option></select></div>
+    <div class="form-group"><label>Empleado</label><select id="appt-employee"><option value="">Seleccionar...</option></select></div>
+    <div class="form-group"><label>Notas</label><textarea id="appt-notes"></textarea></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('appt-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveAppointment()">Guardar</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="repeat-modal">
+  <div class="modal" style="max-width:380px">
+    <h3>🔁 Repetir Turno</h3>
+    <p style="color:var(--text2);font-size:13px;margin-bottom:16px">Se crearán turnos iguales en las siguientes semanas.</p>
+    <div class="form-group"><label>¿Cuántas semanas?</label><input type="number" id="repeat-weeks" min="1" max="52" placeholder="Ej: 3"></div>
+    <div id="repeat-preview" style="font-size:12px;color:var(--text2);margin-top:8px"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('repeat-modal')">Cancelar</button><button class="btn btn-primary" onclick="doRepeatAppointment()">Crear turnos</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="sale-modal">
+  <div class="modal">
+    <h3>Nueva Venta</h3>
+    <div class="form-group"><label>Cliente</label><select id="sale-client"><option value="">Seleccionar...</option></select></div>
+    <div class="form-group"><label>Empleado</label><select id="sale-employee"><option value="">Seleccionar...</option></select></div>
+    <div class="form-group"><label>Método de pago</label><select id="sale-payment"><option value="efectivo">Efectivo</option><option value="tarjeta">Tarjeta</option><option value="transferencia">Transferencia</option><option value="otro">Otro</option></select></div>
+    <div class="form-group">
+      <label>Items</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <select id="sale-item-type" style="flex:0 0 130px" onchange="updateSaleItemRef()"><option value="product">Producto</option><option value="treatment">Tratamiento</option><option value="promo">Promo</option></select>
+        <select id="sale-item-ref" style="flex:1;min-width:130px"><option value="">Seleccionar...</option></select>
+        <input type="number" id="sale-item-qty" value="1" min="1" style="width:60px">
+        <button class="btn btn-ghost btn-sm" onclick="addSaleItem()">+ Agregar</button>
       </div>
-      
-      <div class="dashboard-tables">
-        <div class="card">
-          <h3>Últimas Ventas</h3>
-          <div id="dash-sales"></div>
-        </div>
-        <div class="card">
-          <h3>Gastos Recientes</h3>
-          <div id="dash-expenses"></div>
-        </div>
-      </div>
+      <div id="sale-items-list" style="margin-top:10px"></div>
     </div>
+    <div style="text-align:right;font-size:15px;font-weight:700;color:var(--accent);margin-top:8px">Total: $<span id="sale-total">0</span></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('sale-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveSale()">Confirmar Venta</button></div>
+  </div>
+</div>
 
-    <div id="v-clients" class="view hidden"></div>
-    </main>
+<div class="modal-overlay" id="exp-modal">
+  <div class="modal">
+    <h3 id="exp-modal-title">Nuevo Gasto</h3><input type="hidden" id="exp-id">
+    <div class="form-group"><label>Descripción</label><input id="exp-desc"></div>
+    <div class="form-row"><div class="form-group"><label>Monto ($)</label><input type="number" id="exp-amount" min="0"></div><div class="form-group"><label>Fecha</label><input type="date" id="exp-date"></div></div>
+    <div class="form-group"><label>Categoría</label><input id="exp-category" placeholder="Ej: suministros..."></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('exp-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveExpense()">Guardar</button></div>
+  </div>
+</div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-  
-  <script>
-    /* Lógica de Firebase integrada */
-    let db, cache = { clients:[], shifts:[], sales:[], expenses:[] };
-    const g = id => document.getElementById(id);
-    const esc = t => String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
-    const fmt$ = n => new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS'}).format(n||0);
+<div class="modal-overlay" id="treat-modal">
+  <div class="modal">
+    <h3 id="treat-modal-title">Nuevo Tratamiento</h3><input type="hidden" id="treat-id">
+    <div class="form-group"><label>Nombre</label><input id="treat-name"></div>
+    <div class="form-group"><label>Descripción</label><textarea id="treat-desc"></textarea></div>
+    <div class="form-row"><div class="form-group"><label>Duración (min)</label><input type="number" id="treat-duration" min="1"></div><div class="form-group"><label>Precio ($)</label><input type="number" id="treat-price" min="0"></div></div>
+    <div class="form-group"><label>Categoría</label><select id="treat-category"><option value="">Seleccionar...</option><option>Depilación</option><option>Masajes</option><option>Uñas</option><option>Cutis</option><option>Corporal</option><option>Otras</option></select></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('treat-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveTreatment()">Guardar</button></div>
+  </div>
+</div>
 
-    function initFirebase(cfg){
-      try {
-        const app = firebase.initializeApp(cfg);
-        db = app.database();
-        loadAll();
-      } catch(e) { alert("Error al conectar"); logout(); }
-    }
+<div class="modal-overlay" id="prod-modal">
+  <div class="modal">
+    <h3 id="prod-modal-title">Nuevo Producto</h3><input type="hidden" id="prod-id">
+    <div class="form-group"><label>Nombre</label><input id="prod-name"></div>
+    <div class="form-group"><label>Descripción</label><textarea id="prod-desc"></textarea></div>
+    <div class="form-row"><div class="form-group"><label>Precio ($)</label><input type="number" id="prod-price" min="0"></div><div class="form-group"><label>Stock</label><input type="number" id="prod-stock" min="0"></div></div>
+    <div class="form-row"><div class="form-group"><label>Categoría</label><input id="prod-category"></div><div class="form-group"><label>Código de barra</label><input id="prod-barcode"></div></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('prod-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveProduct()">Guardar</button></div>
+  </div>
+</div>
 
-    function loadAll(){
-      db.ref('/').on('value', snap => {
-        const data = snap.val() || {};
-        cache.clients = Object.entries(data.clients||{}).map(([id,v])=>({id,...v}));
-        cache.shifts = Object.entries(data.shifts||{}).map(([id,v])=>({id,...v}));
-        cache.sales = Object.entries(data.sales||{}).map(([id,v])=>({id,...v}));
-        cache.expenses = Object.entries(data.expenses||{}).map(([id,v])=>({id,...v}));
-        
-        g('loading-screen').style.display='none';
-        g('sidebar').style.display='flex';
-        g('main-content').style.display='block';
-        renderDash();
-      });
-    }
+<div class="modal-overlay" id="promo-modal">
+  <div class="modal">
+    <h3 id="promo-modal-title">Nueva Promo</h3><input type="hidden" id="promo-id">
+    <div class="form-group"><label>Nombre</label><input id="promo-name"></div>
+    <div class="form-group"><label>Descripción</label><textarea id="promo-desc"></textarea></div>
+    <div class="form-group">
+      <label>Productos incluidos</label>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+        <select id="promo-prod-ref" style="flex:1"><option value="">Seleccionar producto...</option></select>
+        <input type="number" id="promo-prod-qty" value="1" min="1" style="width:60px">
+        <button class="btn btn-ghost btn-sm" onclick="addPromoProduct()">+ Agregar</button>
+      </div>
+      <div id="promo-products-list"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Precio ($)</label><input type="number" id="promo-price" min="0"></div>
+      <div class="form-group"><label>Estado</label><div class="toggle-wrap"><label class="toggle"><input type="checkbox" id="promo-active" checked><span class="toggle-slider"></span></label><span style="font-size:13px;color:var(--text2)">Activa</span></div></div>
+    </div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('promo-modal')">Cancelar</button><button class="btn btn-primary" onclick="savePromo()">Guardar</button></div>
+  </div>
+</div>
 
-    function showView(v){
-      document.querySelectorAll('.view').forEach(x => x.classList.add('hidden'));
-      document.querySelectorAll('.nav-item').forEach(x => x.classList.remove('active'));
-      g('v-'+v).classList.remove('hidden');
-      if(v==='clients') renderClients();
-    }
+<div class="modal-overlay" id="client-modal">
+  <div class="modal">
+    <h3 id="client-modal-title">Nuevo Cliente</h3><input type="hidden" id="client-id">
+    <div class="form-group"><label>Nombre</label><input id="client-name"></div>
+    <div class="form-row"><div class="form-group"><label>Email</label><input type="email" id="client-email"></div><div class="form-group"><label>Teléfono</label><input id="client-phone"></div></div>
+    <div class="form-group"><label>Notas</label><textarea id="client-notes" placeholder="Historial, alergias, preferencias..."></textarea></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('client-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveClient()">Guardar</button></div>
+  </div>
+</div>
 
-    function renderDash(){
-      g('dash-clients').textContent = cache.clients.length;
-      const totalSales = cache.sales.reduce((a,b)=>a+(b.total||0),0);
-      const totalExp = cache.expenses.reduce((a,b)=>a+(b.amount||0),0);
-      g('dash-balance').textContent = fmt$(totalSales - totalExp);
-    }
+<div class="modal-overlay" id="history-treat-modal">
+  <div class="modal modal-lg">
+    <h3 id="history-treat-title">📋 Historial de Tratamientos</h3>
+    <div id="history-treat-body"><div class="loader"><div class="spinner"></div></div></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('history-treat-modal')">Cerrar</button></div>
+  </div>
+</div>
 
-    function renderClients(){
-      g('v-clients').innerHTML = `
-        <div class="card">
-          <div style="display:flex; justify-content:space-between; margin-bottom:20px">
-            <h3>Listado de Clientes</h3>
-            <button class="btn btn-primary">+ Agregar</button>
-          </div>
-          <table>
-            <thead><tr><th>Nombre</th><th>Teléfono</th></tr></thead>
-            <tbody>
-              ${cache.clients.map(c => `<tr><td>${esc(c.name)}</td><td>${esc(c.phone)}</td></tr>`).join('')}
-            </tbody>
-          </table>
-        </div>`;
-    }
+<div class="modal-overlay" id="history-sales-modal">
+  <div class="modal modal-lg">
+    <h3 id="history-sales-title">💲 Historial de Compras</h3>
+    <div id="history-sales-body"><div class="loader"><div class="spinner"></div></div></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('history-sales-modal')">Cerrar</button></div>
+  </div>
+</div>
 
-    function saveConfig(){
-      const c = { 
-        apiKey: g('cfg-key').value, 
-        authDomain: g('cfg-auth').value, 
-        databaseURL: g('cfg-db').value, 
-        projectId: g('cfg-pid').value 
-      };
-      localStorage.setItem('lor_cfg', JSON.stringify(c));
-      location.reload();
-    }
+<div class="modal-overlay" id="emp-modal">
+  <div class="modal">
+    <h3 id="emp-modal-title">Nuevo Empleado</h3><input type="hidden" id="emp-id">
+    <div class="form-group"><label>Nombre</label><input id="emp-name"></div>
+    <div class="form-row"><div class="form-group"><label>Email</label><input type="email" id="emp-email"></div><div class="form-group"><label>Teléfono</label><input id="emp-phone"></div></div>
+    <div class="form-row"><div class="form-group"><label>Rol</label><input id="emp-role"></div><div class="form-group"><label>Comisión (%)</label><input type="number" id="emp-commission" min="0" max="100"></div></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('emp-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveEmployee()">Guardar</button></div>
+  </div>
+</div>
 
-    function logout(){ localStorage.removeItem('lor_cfg'); location.reload(); }
+<div id="toast"></div>
 
-    const saved = localStorage.getItem('lor_cfg');
-    if(saved) initFirebase(JSON.parse(saved));
-    else { g('loading-screen').style.display='none'; g('login-screen').classList.add('show'); }
-  </script>
+<script type="module">
+  import { initializeApp, getApps, deleteApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+  import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+  let db=null,auth=null,saleItems=[],promoProducts=[],repeatApptId=null;
+  const cache={clients:[],employees:[],treatments:[],products:[],appointments:[],sales:[],expenses:[],commissions:[],promos:[]};
+  const CFG_KEY='lorenzza_cfg_v1';
+
+  const g=id=>document.getElementById(id);
+  const v=id=>{const el=g(id);return el?el.value.trim():''};
+  const set=(id,val)=>{const el=g(id);if(el)el.value=val??''};
+  const esc=s=>{const d=document.createElement('div');d.textContent=s||'';return d.innerHTML};
+  const fmt$=n=>'$'+Number(n||0).toLocaleString('es-AR',{minimumFractionDigits:2});
+  const fmtDate=ts=>{if(!ts)return '-';const d=ts.toDate?ts.toDate():new Date(ts);return d.toLocaleDateString('es-AR')};
+  const todayStr=()=>new Date().toISOString().split('T')[0];
+  const rst=ids=>ids.forEach(id=>set(id,''));
+  const statusLabel=s=>({scheduled:'Programado',completed:'Cumplido',cancelled:'Cancelado'}[s]||s);
+  const emptyRow=(id,cols,msg)=>g(id).innerHTML=`<tr><td colspan="${cols}"><div class="empty">${msg||'Sin registros'}</div></td></tr>`;
+  const needsDb=()=>{if(!db){toast('Primero configurá Firebase','error');showConfigModal();return true;}return false;};
+
+  function toast(msg,type='success'){
+    const el=document.createElement('div');el.className='toast-msg '+type;
+    el.textContent=(type==='success'?'✓ ':'✕ ')+msg;
+    g('toast').appendChild(el);setTimeout(()=>el.remove(),4000);
+  }
+  const openModal=id=>g(id).classList.add('open');
+  const closeModal=id=>g(id).classList.remove('open');
+
+  window.closeModal=closeModal;window.openModal=openModal;window.toast=toast;
+  window.filterTable=(tbodyId,searchId)=>{const q=g(searchId).value.toLowerCase();document.querySelectorAll(`#${tbodyId} tr`).forEach(r=>r.style.display=r.textContent.toLowerCase().includes(q)?'':'none');};
+  window.toggleSidebar=()=>{g('sidebar').classList.toggle('open');g('mobileOverlay').classList.toggle('show');};
+  window.closeSidebar=()=>{g('sidebar').classList.remove('open');g('mobileOverlay').classList.remove('show');};
+
+  function loadConfig(){try{return JSON.parse(localStorage.getItem(CFG_KEY));}catch(e){return null;}}
+  window.showConfigModal=function(){const cfg=loadConfig()||{};['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'].forEach(k=>set('cfg-'+k,cfg[k]));set('cfg-dbId',cfg.firestoreDatabaseId);openModal('config-modal');};
+  window.doSaveConfig=function(){const cfg={apiKey:v('cfg-apiKey'),authDomain:v('cfg-authDomain'),projectId:v('cfg-projectId'),storageBucket:v('cfg-storageBucket'),messagingSenderId:v('cfg-messagingSenderId'),appId:v('cfg-appId'),firestoreDatabaseId:v('cfg-dbId')||'(default)'};if(!cfg.apiKey||!cfg.projectId){toast('Completá API Key y Project ID','error');return;}localStorage.setItem(CFG_KEY,JSON.stringify(cfg));closeModal('config-modal');initFirebase(cfg);};
+
+  function initFirebase(cfg){
+    getApps().forEach(app=>{try{deleteApp(app);}catch(e){}});
+    try{
+      const app=initializeApp(cfg);
+      const dbId=cfg.firestoreDatabaseId&&cfg.firestoreDatabaseId!=='(default)'?cfg.firestoreDatabaseId:undefined;
+      db=dbId?getFirestore(app,dbId):getFirestore(app);
+      auth=getAuth(app);
+      onAuthStateChanged(auth,user=>{user?[showApp(user),loadAll()]:showLoginScreen();});
+      hideLoading();
+    }catch(e){hideLoading();toast('Error Firebase: '+e.message,'error');console.error(e);}
+  }
+  const hideLoading=()=>{const ls=g('loading-screen');if(ls)ls.style.display='none';};
+  const showLoginScreen=()=>{g('login-screen').classList.add('show');g('sidebar').style.display='none';g('main').style.display='none';};
+  function showApp(user){
+    g('login-screen').classList.remove('show');g('sidebar').style.display='';g('main').style.display='';
+    const photo=user.photoURL||'https://ui-avatars.com/api/?name='+encodeURIComponent(user.displayName||'U')+'&background=5e9c91&color=fff';
+    g('user-chip-wrap').innerHTML=`<div class="user-chip"><img src="${photo}" onerror="this.src='https://ui-avatars.com/api/?name=U&background=5e9c91&color=fff'"><div class="user-chip-info"><div class="user-chip-name">${esc(user.displayName||'Usuario')}</div><div class="user-chip-email">${esc(user.email)}</div></div><button class="btn-logout" onclick="window.doLogout()" title="Cerrar sesión">↩</button></div>`;
+  }
+  window.doGoogleLogin=async()=>{if(!auth){toast('Configurá Firebase primero','error');showConfigModal();return;}try{await signInWithPopup(auth,new GoogleAuthProvider());}catch(e){toast('Error: '+e.message,'error');}};
+  window.doLogout=async()=>{if(!confirm('¿Cerrar sesión?'))return;await signOut(auth);};
+
+  const pageTitles={dashboard:'Panel Principal',appointments:'Turnos',sales:'Ventas',expenses:'Gastos',treatments:'Tratamientos',products:'Productos',promos:'Promos',clients:'Clientes',employees:'Empleados',commissions:'Comisiones'};
+  document.querySelectorAll('.nav-item').forEach(item=>{item.addEventListener('click',()=>{const page=item.dataset.page;document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));item.classList.add('active');g('page-'+page).classList.add('active');g('pageTitle').textContent=pageTitles[page];window.closeSidebar();});});
+  document.querySelectorAll('.modal-overlay').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+
+  const getAll=async col=>{const s=await getDocs(collection(db,col));return s.docs.map(d=>({id:d.id,...d.data()}));};
+  const addOne=(col,data)=>addDoc(collection(db,col),data);
+  const updateOne=(col,id,data)=>updateDoc(doc(db,col,id),data);
+  const deleteOne=(col,id)=>deleteDoc(doc(db,col,id));
+
+  async function loadAll(){if(!db)return;await Promise.all([loadClients(),loadEmployees(),loadTreatments(),loadProducts(),loadPromos(),loadAppointments(),loadSales(),loadExpenses(),loadCommissions()]);renderDashboard();}
+
+  // CLIENTS
+  async function loadClients(){cache.clients=await getAll('clients');renderClients();populateSelects();}
+  function renderClients(){
+    if(!cache.clients.length){emptyRow('clients-body',6);return;}
+    g('clients-body').innerHTML=cache.clients.map(c=>`<tr><td style="font-weight:500">${esc(c.name)}</td><td>${c.email||'-'}</td><td>${c.phone||'-'}</td><td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.notes||'-'}</td><td><button class="btn-icon" title="Historial tratamientos" onclick="window.showClientTreatHistory('${c.id}','${esc(c.name)}')">📋</button> <button class="btn-icon" title="Historial compras" onclick="window.showClientSalesHistory('${c.id}','${esc(c.name)}')">💲</button></td><td><button class="btn btn-ghost btn-sm" onclick="window._editClient('${c.id}')">✏</button> <button class="btn btn-danger btn-sm" onclick="window._del('clients','${c.id}')">🗑</button></td></tr>`).join('');
+    g('stat-clients').textContent=cache.clients.length;
+  }
+  window.showClientTreatHistory=(clientId,name)=>{
+    g('history-treat-title').textContent=`📋 Tratamientos — ${name}`;openModal('history-treat-modal');
+    const appts=cache.appointments.filter(a=>a.clientId===clientId).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+    if(!appts.length){g('history-treat-body').innerHTML='<div class="empty">Sin tratamientos registrados</div>';return;}
+    g('history-treat-body').innerHTML=appts.map(a=>{const tr=cache.treatments.find(t=>t.id===a.treatmentId);const em=cache.employees.find(e=>e.id===a.employeeId);const badge=`<span class="badge badge-${a.status}">${statusLabel(a.status)}</span>`;return `<div class="history-item"><div class="history-date">${a.date||'-'} ${a.startTime?'· '+a.startTime:''}</div><div class="history-main">${tr?esc(tr.name):'Sin tratamiento'}</div><div class="history-sub">${em?'Atendió: '+esc(em.name):''} ${badge}</div></div>`;}).join('');
+  };
+  window.showClientSalesHistory=(clientId,name)=>{
+    g('history-sales-title').textContent=`💲 Compras — ${name}`;openModal('history-sales-modal');
+    const sales=cache.sales.filter(s=>s.clientId===clientId).sort((a,b)=>{const da=a.createdAt?.toDate?.()??new Date(0),db_=b.createdAt?.toDate?.()??new Date(0);return db_-da;});
+    if(!sales.length){g('history-sales-body').innerHTML='<div class="empty">Sin compras registradas</div>';return;}
+    let total=0;const rows=sales.map(s=>{total+=s.total||0;const items=(s.items||[]).map(i=>`${i.name} x${i.quantity}`).join(', ');return `<div class="history-item"><div class="history-date">${fmtDate(s.createdAt)} · ${s.paymentMethod||''}</div><div class="history-main">${fmt$(s.total)}</div><div class="history-sub">${items}</div></div>`;}).join('');
+    g('history-sales-body').innerHTML=rows+`<div style="text-align:right;padding:14px 0;font-weight:700;color:var(--accent);font-size:15px">Total acumulado: ${fmt$(total)}</div>`;
+  };
+  window.openClientModal=()=>{rst(['client-id','client-name','client-email','client-phone','client-notes']);set('client-modal-title','Nuevo Cliente');openModal('client-modal');};
+  window._editClient=id=>{const c=cache.clients.find(x=>x.id===id);if(!c)return;set('client-modal-title','Editar Cliente');set('client-id',c.id);set('client-name',c.name);set('client-email',c.email);set('client-phone',c.phone);set('client-notes',c.notes);openModal('client-modal');};
+  window.saveClient=async()=>{if(needsDb())return;const id=v('client-id');const data={name:v('client-name'),email:v('client-email'),phone:v('client-phone'),notes:v('client-notes')};if(!data.name){toast('El nombre es requerido','error');return;}try{if(id)await updateOne('clients',id,data);else await addOne('clients',{...data,createdAt:serverTimestamp()});closeModal('client-modal');toast('Cliente guardado');await loadClients();}catch(e){toast(e.message,'error');}};
+
+  // EMPLOYEES
+  async function loadEmployees(){cache.employees=await getAll('employees');renderEmployees();populateSelects();}
+  function renderEmployees(){if(!cache.employees.length){emptyRow('emps-body',6);return;}g('emps-body').innerHTML=cache.employees.map(e=>`<tr><td style="font-weight:500">${esc(e.name)}</td><td>${e.email}</td><td>${e.phone||'-'}</td><td>${e.role||'-'}</td><td>${e.commissionRate||0}%</td><td><button class="btn btn-ghost btn-sm" onclick="window._editEmp('${e.id}')">✏</button> <button class="btn btn-danger btn-sm" onclick="window._del('employees','${e.id}')">🗑</button></td></tr>`).join('');}
+  window.openEmpModal=()=>{rst(['emp-id','emp-name','emp-email','emp-phone','emp-role','emp-commission']);set('emp-modal-title','Nuevo Empleado');openModal('emp-modal');};
+  window._editEmp=id=>{const e=cache.employees.find(x=>x.id===id);if(!e)return;set('emp-modal-title','Editar Empleado');set('emp-id',e.id);set('emp-name',e.name);set('emp-email',e.email);set('emp-phone',e.phone);set('emp-role',e.role);set('emp-commission',e.commissionRate);openModal('emp-modal');};
+  window.saveEmployee=async()=>{if(needsDb())return;const id=v('emp-id');const data={name:v('emp-name'),email:v('emp-email'),phone:v('emp-phone'),role:v('emp-role'),commissionRate:parseFloat(v('emp-commission'))||0};if(!data.name||!data.email){toast('Nombre y email requeridos','error');return;}try{if(id)await updateOne('employees',id,data);else await addOne('employees',data);closeModal('emp-modal');toast('Empleado guardado');await loadEmployees();}catch(e){toast(e.message,'error');}};
+
+  // TREATMENTS
+  const TREAT_CATEGORIES=['Depilación','Masajes','Uñas','Cutis','Corporal','Otras'];
+  async function loadTreatments(){cache.treatments=await getAll('treatments');renderTreatments();populateSelects();}
+  window.renderTreatments=function(){
+    const container=g('treats-container');
+    if(!cache.treatments.length){container.innerHTML='<div class="card"><div class="empty">Sin tratamientos. Agregá uno con el botón "+ Nuevo Tratamiento".</div></div>';return;}
+    const groups={};TREAT_CATEGORIES.forEach(cat=>groups[cat]=[]);
+    cache.treatments.forEach(t=>{const cat=t.category||'Otras';if(!groups[cat])groups[cat]=[];groups[cat].push(t);});
+    let html='';
+    TREAT_CATEGORIES.forEach(cat=>{
+      const items=groups[cat]||[];
+      html+=`<div class="cat-section" data-cat="${esc(cat)}"><div class="cat-header" onclick="this.parentElement.classList.toggle('collapsed')"><div class="cat-title">${esc(cat)} <span class="cat-count">${items.length}</span></div><span class="cat-arrow">▼</span></div><div class="cat-body">${items.length?`<div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Duración (min)</th><th>Precio</th><th>Descripción</th><th></th></tr></thead><tbody>${items.map(t=>`<tr><td style="font-weight:500">${esc(t.name)}</td><td>${t.duration||'-'}</td><td style="color:var(--accent);font-weight:600">${fmt$(t.price)}</td><td style="font-size:12px;color:var(--text2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.description||'')||'-'}</td><td><button class="btn btn-ghost btn-sm" onclick="window._editTreat('${t.id}')">✏</button> <button class="btn btn-danger btn-sm" onclick="window._del('treatments','${t.id}')">🗑</button></td></tr>`).join('')}</tbody></table></div>`:`<div class="empty" style="padding:18px">Sin tratamientos en esta categoría</div>`}</div></div>`;
+    });
+    container.innerHTML=html;
+  };
+  window.filterTreatsAll=()=>{const q=v('treat-search').toLowerCase();document.querySelectorAll('#treats-container .cat-section').forEach(section=>{const rows=section.querySelectorAll('tbody tr');let visible=0;rows.forEach(r=>{const match=r.textContent.toLowerCase().includes(q);r.style.display=match?'':'none';if(match)visible++;});if(q){section.style.display=visible>0?'':'none';if(visible>0)section.classList.remove('collapsed');}else{section.style.display='';}});};
+  window.openTreatModal=()=>{rst(['treat-id','treat-name','treat-desc','treat-duration','treat-price']);set('treat-category','');set('treat-modal-title','Nuevo Tratamiento');openModal('treat-modal');};
+  window._editTreat=id=>{const t=cache.treatments.find(x=>x.id===id);if(!t)return;set('treat-modal-title','Editar Tratamiento');set('treat-id',t.id);set('treat-name',t.name);set('treat-desc',t.description);set('treat-duration',t.duration);set('treat-price',t.price);set('treat-category',t.category);openModal('treat-modal');};
+  window.saveTreatment=async()=>{if(needsDb())return;const id=v('treat-id');const data={name:v('treat-name'),description:v('treat-desc'),duration:parseFloat(v('treat-duration'))||0,price:parseFloat(v('treat-price'))||0,category:v('treat-category')};if(!data.name){toast('El nombre es requerido','error');return;}if(!data.category){toast('La categoría es requerida','error');return;}try{if(id)await updateOne('treatments',id,data);else await addOne('treatments',data);closeModal('treat-modal');toast('Tratamiento guardado');await loadTreatments();}catch(e){toast(e.message,'error');}};
+
+  // PRODUCTS
+  async function loadProducts(){cache.products=await getAll('products');renderProducts();populateSelects();}
+  function renderProducts(){if(!cache.products.length){emptyRow('prods-body',6);return;}g('prods-body').innerHTML=cache.products.map(p=>{const low=p.stock<=3;return `<tr><td style="font-weight:500">${esc(p.name)}</td><td>${p.category||'-'}</td><td style="color:${low?'var(--danger)':'inherit'}">${p.stock}${low?' ⚠':''}</td><td style="color:var(--accent);font-weight:600">${fmt$(p.price)}</td><td style="font-size:11px;color:var(--text3)">${p.barcode||'-'}</td><td><button class="btn btn-ghost btn-sm" onclick="window._editProd('${p.id}')">✏</button> <button class="btn btn-danger btn-sm" onclick="window._del('products','${p.id}')">🗑</button></td></tr>`;}).join('');}
+  window.openProdModal=()=>{rst(['prod-id','prod-name','prod-desc','prod-price','prod-stock','prod-category','prod-barcode']);set('prod-modal-title','Nuevo Producto');openModal('prod-modal');};
+  window._editProd=id=>{const p=cache.products.find(x=>x.id===id);if(!p)return;set('prod-modal-title','Editar Producto');set('prod-id',p.id);set('prod-name',p.name);set('prod-desc',p.description);set('prod-price',p.price);set('prod-stock',p.stock);set('prod-category',p.category);set('prod-barcode',p.barcode);openModal('prod-modal');};
+  window.saveProduct=async()=>{if(needsDb())return;const id=v('prod-id');const data={name:v('prod-name'),description:v('prod-desc'),price:parseFloat(v('prod-price'))||0,stock:parseInt(v('prod-stock'))||0,category:v('prod-category'),barcode:v('prod-barcode')};if(!data.name){toast('El nombre es requerido','error');return;}try{if(id)await updateOne('products',id,data);else await addOne('products',data);closeModal('prod-modal');toast('Producto guardado');await loadProducts();}catch(e){toast(e.message,'error');}};
+
+  // PROMOS
+  async function loadPromos(){cache.promos=await getAll('promos');renderPromos();populateSelects();}
+  window.renderPromos=function(){const fa=g('promo-filter-active')?.value;let list=cache.promos;if(fa==='1')list=list.filter(p=>p.active);else if(fa==='0')list=list.filter(p=>!p.active);if(!list.length){emptyRow('promos-body',5);return;}g('promos-body').innerHTML=list.map(p=>{const items=(p.products||[]).map(i=>`${i.name} x${i.qty}`).join(', ');const badge=p.active?'<span class="badge badge-active">Activa</span>':'<span class="badge badge-inactive">Inactiva</span>';return `<tr><td style="font-weight:500">${esc(p.name)}</td><td style="font-size:12px;color:var(--text2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${items||'-'}</td><td style="color:var(--accent);font-weight:600">${fmt$(p.price)}</td><td>${badge}</td><td><button class="btn btn-ghost btn-sm" onclick="window._editPromo('${p.id}')">✏</button> <button class="btn btn-danger btn-sm" onclick="window._del('promos','${p.id}')">🗑</button></td></tr>`;}).join('');};
+  window.openPromoModal=()=>{promoProducts=[];renderPromoProductsList();rst(['promo-id','promo-name','promo-desc','promo-price']);g('promo-active').checked=true;set('promo-modal-title','Nueva Promo');updatePromoProdRef();openModal('promo-modal');};
+  window._editPromo=id=>{const p=cache.promos.find(x=>x.id===id);if(!p)return;set('promo-modal-title','Editar Promo');set('promo-id',p.id);set('promo-name',p.name);set('promo-desc',p.description);set('promo-price',p.price);g('promo-active').checked=!!p.active;promoProducts=[...(p.products||[])];renderPromoProductsList();updatePromoProdRef();openModal('promo-modal');};
+  function updatePromoProdRef(){g('promo-prod-ref').innerHTML='<option value="">Seleccionar producto...</option>'+cache.products.map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');}
+  window.addPromoProduct=()=>{const refId=v('promo-prod-ref');const qty=parseInt(v('promo-prod-qty'))||1;const prod=cache.products.find(x=>x.id===refId);if(!prod){toast('Seleccioná un producto','error');return;}promoProducts.push({itemId:prod.id,name:prod.name,qty});renderPromoProductsList();};
+  window.removePromoProduct=idx=>{promoProducts.splice(idx,1);renderPromoProductsList();};
+  function renderPromoProductsList(){g('promo-products-list').innerHTML=promoProducts.length?promoProducts.map((it,idx)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:10px;margin-bottom:4px;font-size:12px"><span>${esc(it.name)} x${it.qty}</span><button onclick="window.removePromoProduct(${idx})" style="background:none;border:none;color:var(--danger);cursor:pointer">✕</button></div>`).join(''):'<div style="color:var(--text3);font-size:12px">Sin productos</div>';}
+  window.savePromo=async()=>{if(needsDb())return;const id=v('promo-id');const data={name:v('promo-name'),description:v('promo-desc'),price:parseFloat(v('promo-price'))||0,active:g('promo-active').checked,products:promoProducts};if(!data.name){toast('El nombre es requerido','error');return;}try{if(id)await updateOne('promos',id,data);else await addOne('promos',data);closeModal('promo-modal');toast('Promo guardada');await loadPromos();}catch(e){toast(e.message,'error');}};
+
+  // APPOINTMENTS
+  async function loadAppointments(){cache.appointments=await getAll('appointments');renderAppointments();}
+  window.renderAppointments=function(){
+    const filter=g('appt-filter-status').value;
+    const list=cache.appointments.filter(a=>!filter||a.status===filter).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+    if(!list.length){emptyRow('appts-body',8);return;}
+    g('appts-body').innerHTML=list.map(a=>{
+      const cl=cache.clients.find(c=>c.id===a.clientId);const tr=cache.treatments.find(t=>t.id===a.treatmentId);const em=cache.employees.find(e=>e.id===a.employeeId);
+      let actions='';
+      if(a.status==='scheduled'){actions=`<div class="status-actions"><button class="btn btn-success btn-sm" onclick="window._changeStatus('${a.id}','completed')">✓ Cumplido</button><button class="btn btn-danger btn-sm" onclick="window._changeStatus('${a.id}','cancelled')">✕ Cancelar</button></div>`;}
+      else if(a.status==='cancelled'){actions=`<button class="btn btn-ghost btn-sm" onclick="window._changeStatus('${a.id}','scheduled')">↺ Reprogramar</button>`;}
+      else{actions=`<span style="font-size:11px;color:var(--text3)">—</span>`;}
+      const repeatBtn=a.status==='scheduled'?`<button class="btn-repeat" onclick="window.openRepeatModal('${a.id}')" title="Repetir turno">R</button>`:'';
+      return `<tr><td>${a.date||'-'}</td><td>${a.startTime||'-'}${a.endTime?' - '+a.endTime:''}</td><td style="font-weight:500">${cl?esc(cl.name):'—'}</td><td>${tr?esc(tr.name):'—'}</td><td>${em?esc(em.name):'—'}</td><td><span class="badge badge-${a.status}">${statusLabel(a.status)}</span></td><td>${actions}</td><td style="white-space:nowrap">${repeatBtn} <button class="btn btn-ghost btn-sm" onclick="window._editAppt('${a.id}')">✏</button> <button class="btn btn-danger btn-sm" onclick="window._del('appointments','${a.id}')">🗑</button></td></tr>`;
+    }).join('');
+  };
+  window.openRepeatModal=id=>{repeatApptId=id;set('repeat-weeks','');g('repeat-preview').textContent='';openModal('repeat-modal');};
+  g('repeat-weeks').addEventListener('input',()=>{const weeks=parseInt(v('repeat-weeks'));const appt=cache.appointments.find(a=>a.id===repeatApptId);if(!appt||!appt.date||isNaN(weeks)||weeks<1){g('repeat-preview').textContent='';return;}const dates=[];for(let i=1;i<=weeks;i++){const d=new Date(appt.date+'T12:00:00');d.setDate(d.getDate()+7*i);dates.push(d.toLocaleDateString('es-AR'));}g('repeat-preview').textContent='Se crearán turnos el: '+dates.join(', ');});
+  window.doRepeatAppointment=async()=>{if(needsDb())return;const weeks=parseInt(v('repeat-weeks'));if(!weeks||weeks<1){toast('Ingresá un número de semanas válido','error');return;}const appt=cache.appointments.find(a=>a.id===repeatApptId);if(!appt){toast('Turno no encontrado','error');return;}try{const proms=[];for(let i=1;i<=weeks;i++){const d=new Date(appt.date+'T12:00:00');d.setDate(d.getDate()+7*i);const newDate=d.toISOString().split('T')[0];proms.push(addOne('appointments',{date:newDate,startTime:appt.startTime||'',endTime:appt.endTime||'',status:'scheduled',clientId:appt.clientId||'',treatmentId:appt.treatmentId||'',employeeId:appt.employeeId||'',notes:appt.notes||''}));}await Promise.all(proms);closeModal('repeat-modal');toast(`${weeks} turno(s) creado(s) ✓`);await loadAppointments();renderDashboard();}catch(e){toast(e.message,'error');}};
+  window._changeStatus=async(id,newStatus)=>{if(needsDb())return;try{await updateOne('appointments',id,{status:newStatus});toast('Estado actualizado');await loadAppointments();renderDashboard();}catch(e){toast(e.message,'error');}};
+  window.openApptModal=()=>{rst(['appt-id','appt-date','appt-start','appt-end','appt-notes']);set('appt-status','scheduled');g('appt-status').disabled=false;set('appt-modal-title','Nuevo Turno');openModal('appt-modal');};
+  window._editAppt=id=>{const a=cache.appointments.find(x=>x.id===id);if(!a)return;set('appt-modal-title','Editar Turno');set('appt-id',a.id);set('appt-date',a.date);set('appt-start',a.startTime);set('appt-end',a.endTime);set('appt-status',a.status);set('appt-client',a.clientId);set('appt-treatment',a.treatmentId);set('appt-employee',a.employeeId);set('appt-notes',a.notes);g('appt-status').disabled=a.status==='completed';openModal('appt-modal');};
+  window.saveAppointment=async()=>{if(needsDb())return;const id=v('appt-id');const data={date:v('appt-date'),startTime:v('appt-start'),endTime:v('appt-end'),status:g('appt-status').value,clientId:v('appt-client'),treatmentId:v('appt-treatment'),employeeId:v('appt-employee'),notes:v('appt-notes')};if(!data.date||!data.clientId){toast('Fecha y cliente requeridos','error');return;}g('appt-status').disabled=false;try{if(id)await updateOne('appointments',id,data);else await addOne('appointments',data);closeModal('appt-modal');toast('Turno guardado');await loadAppointments();renderDashboard();}catch(e){toast(e.message,'error');}};
+
+  // SALES
+  async function loadSales(){cache.sales=await getAll('sales');renderSales();}
+  function renderSales(){if(!cache.sales.length){emptyRow('sales-body',7);return;}const sorted=[...cache.sales].sort((a,b)=>{const da=a.createdAt?.toDate?.()??new Date(0),db_=b.createdAt?.toDate?.()??new Date(0);return db_-da;});g('sales-body').innerHTML=sorted.map(s=>{const cl=cache.clients.find(c=>c.id===s.clientId),em=cache.employees.find(e=>e.id===s.employeeId);const items=(s.items||[]).map(i=>`${i.name} x${i.quantity}`).join(', ');return `<tr><td>${fmtDate(s.createdAt)}</td><td style="font-weight:500">${cl?esc(cl.name):'—'}</td><td style="font-size:12px;color:var(--text2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${items}</td><td style="font-weight:700;color:var(--accent)">${fmt$(s.total)}</td><td>${s.paymentMethod||'-'}</td><td>${em?esc(em.name):'—'}</td><td><button class="btn btn-danger btn-sm" onclick="window._del('sales','${s.id}')">🗑</button></td></tr>`;}).join('');}
+  window.openSaleModal=()=>{saleItems=[];renderSaleItems();updateSaleItemRef();openModal('sale-modal');};
+  window.updateSaleItemRef=()=>{const type=g('sale-item-type').value;const list=type==='product'?cache.products:type==='promo'?cache.promos.filter(p=>p.active):cache.treatments;g('sale-item-ref').innerHTML='<option value="">Seleccionar...</option>'+list.map(x=>`<option value="${x.id}">${esc(x.name)} — ${fmt$(x.price)}</option>`).join('');};
+  window.addSaleItem=()=>{const type=g('sale-item-type').value,refId=v('sale-item-ref'),qty=parseInt(v('sale-item-qty'))||1;const list=type==='product'?cache.products:type==='promo'?cache.promos:cache.treatments;const item=list.find(x=>x.id===refId);if(!item){toast('Seleccioná un item','error');return;}saleItems.push({itemId:item.id,type,name:item.name,quantity:qty,price:item.price});renderSaleItems();};
+  window.removeSaleItem=idx=>{saleItems.splice(idx,1);renderSaleItems();};
+  function renderSaleItems(){const total=saleItems.reduce((s,i)=>s+i.price*i.quantity,0);g('sale-total').textContent=total.toLocaleString('es-AR',{minimumFractionDigits:2});g('sale-items-list').innerHTML=saleItems.length?saleItems.map((it,idx)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--surface2);border-radius:10px;margin-bottom:4px;font-size:12px"><span>${esc(it.name)} x${it.quantity}</span><span>${fmt$(it.price*it.quantity)} <button onclick="window.removeSaleItem(${idx})" style="background:none;border:none;color:var(--danger);cursor:pointer;margin-left:6px">✕</button></span></div>`).join(''):'<div style="color:var(--text3);font-size:12px">Sin items</div>';}
+  window.saveSale=async()=>{if(needsDb())return;if(!saleItems.length){toast('Agregá al menos un item','error');return;}const clientId=v('sale-client'),employeeId=v('sale-employee');if(!clientId||!employeeId){toast('Cliente y empleado requeridos','error');return;}const total=saleItems.reduce((s,i)=>s+i.price*i.quantity,0);try{const ref=await addOne('sales',{clientId,employeeId,items:saleItems,total,paymentMethod:v('sale-payment'),createdAt:serverTimestamp()});const emp=cache.employees.find(e=>e.id===employeeId);const proms=[];if(emp?.commissionRate)proms.push(addOne('commissions',{employeeId,saleId:ref.id,amount:total*emp.commissionRate/100,date:serverTimestamp()}));saleItems.filter(i=>i.type==='product').forEach(item=>{const prod=cache.products.find(p=>p.id===item.itemId);if(prod)proms.push(updateOne('products',prod.id,{stock:Math.max(0,prod.stock-item.quantity)}));});await Promise.all(proms);closeModal('sale-modal');toast('Venta registrada ✓');saleItems=[];renderSaleItems();await Promise.all([loadSales(),loadProducts(),loadCommissions()]);renderDashboard();}catch(e){toast(e.message,'error');}};
+
+  // EXPENSES
+  async function loadExpenses(){cache.expenses=await getAll('expenses');renderExpenses();}
+  function renderExpenses(){if(!cache.expenses.length){emptyRow('exps-body',5);return;}g('exps-body').innerHTML=[...cache.expenses].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(e=>`<tr><td>${e.date||'-'}</td><td style="font-weight:500">${esc(e.description)}</td><td>${e.category||'-'}</td><td style="color:var(--danger);font-weight:600">${fmt$(e.amount)}</td><td><button class="btn btn-ghost btn-sm" onclick="window._editExp('${e.id}')">✏</button> <button class="btn btn-danger btn-sm" onclick="window._del('expenses','${e.id}')">🗑</button></td></tr>`).join('');}
+  window.openExpModal=()=>{rst(['exp-id','exp-desc','exp-amount','exp-date','exp-category']);set('exp-modal-title','Nuevo Gasto');openModal('exp-modal');};
+  window._editExp=id=>{const e=cache.expenses.find(x=>x.id===id);if(!e)return;set('exp-modal-title','Editar Gasto');set('exp-id',e.id);set('exp-desc',e.description);set('exp-amount',e.amount);set('exp-date',e.date);set('exp-category',e.category);openModal('exp-modal');};
+  window.saveExpense=async()=>{if(needsDb())return;const id=v('exp-id');const data={description:v('exp-desc'),amount:parseFloat(v('exp-amount'))||0,date:v('exp-date'),category:v('exp-category')};if(!data.description||!data.date){toast('Descripción y fecha requeridas','error');return;}try{if(id)await updateOne('expenses',id,data);else await addOne('expenses',data);closeModal('exp-modal');toast('Gasto guardado');await loadExpenses();renderDashboard();}catch(e){toast(e.message,'error');}};
+
+  // COMMISSIONS
+  async function loadCommissions(){cache.commissions=await getAll('commissions');renderCommissions();}
+  function renderCommissions(){if(!cache.commissions.length){emptyRow('comms-body',4);return;}g('comms-body').innerHTML=[...cache.commissions].sort((a,b)=>{const da=a.date?.toDate?.()??new Date(0),db_=b.date?.toDate?.()??new Date(0);return db_-da;}).map(c=>{const em=cache.employees.find(e=>e.id===c.employeeId);return `<tr><td>${fmtDate(c.date)}</td><td style="font-weight:500">${em?esc(em.name):'—'}</td><td style="font-size:11px;color:var(--text3)">${c.saleId||'—'}</td><td style="color:var(--success);font-weight:700">${fmt$(c.amount)}</td></tr>`;}).join('');}
+
+  // DELETE
+  window._del=async(col,id)=>{if(!confirm('¿Eliminar este registro?'))return;if(needsDb())return;const reloaders={clients:loadClients,employees:loadEmployees,treatments:loadTreatments,products:loadProducts,promos:loadPromos,appointments:loadAppointments,sales:loadSales,expenses:loadExpenses,commissions:loadCommissions};try{await deleteOne(col,id);toast('Eliminado');await reloaders[col]?.();renderDashboard();}catch(e){toast(e.message,'error');}};
+
+  // SELECTS
+  function populateSelects(){const cOpts='<option value="">Seleccionar...</option>'+cache.clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');const eOpts='<option value="">Seleccionar...</option>'+cache.employees.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('');const tOpts='<option value="">Seleccionar...</option>'+cache.treatments.map(t=>`<option value="${t.id}">${esc(t.name)} (${t.category||''})</option>`).join('');['appt-client','sale-client'].forEach(id=>{const el=g(id);if(el)el.innerHTML=cOpts;});['appt-employee','sale-employee'].forEach(id=>{const el=g(id);if(el)el.innerHTML=eOpts;});const at=g('appt-treatment');if(at)at.innerHTML=tOpts;}
+
+  // DASHBOARD
+  window.setDashRange=function(preset){const now=new Date();const fmt=d=>d.toISOString().split('T')[0];let from='',to='';if(preset==='today'){from=to=fmt(now);}else if(preset==='week'){const start=new Date(now);start.setDate(now.getDate()-6);from=fmt(start);to=fmt(now);}else if(preset==='month'){from=fmt(new Date(now.getFullYear(),now.getMonth(),1));to=fmt(now);}else if(preset==='year'){from=fmt(new Date(now.getFullYear(),0,1));to=fmt(now);}else if(preset==='clear'){from='';to='';}set('dash-date-from',from);set('dash-date-to',to);renderDashboard();};
+  function inRange(dateStr,from,to){if(!dateStr)return false;if(from&&dateStr<from)return false;if(to&&dateStr>to)return false;return true;}
+  function tsToDateStr(ts){const d=ts?.toDate?.();return d?d.toISOString().split('T')[0]:null;}
+  function renderDashboard(){
+    const td=todayStr(),tm=td.slice(0,7);const from=v('dash-date-from'),to=v('dash-date-to');const hasRange=from||to;
+    let rangeLabel='hoy';if(hasRange){if(from&&to&&from===to)rangeLabel=from;else if(from&&to)rangeLabel=`${from} a ${to}`;else if(from)rangeLabel=`desde ${from}`;else if(to)rangeLabel=`hasta ${to}`;}
+    const salesInRange=hasRange?cache.sales.filter(s=>{const ds=tsToDateStr(s.createdAt);return ds&&inRange(ds,from,to);}):cache.sales.filter(s=>{const ds=tsToDateStr(s.createdAt);return ds===td;});
+    const expensesInRange=hasRange?cache.expenses.filter(e=>inRange(e.date,from,to)):cache.expenses.filter(e=>e.date===td);
+    const apptsInRange=hasRange?cache.appointments.filter(a=>inRange(a.date,from,to)):cache.appointments.filter(a=>a.date===td);
+    const sumSales=salesInRange.reduce((s,x)=>s+(x.total||0),0);const sumExp=expensesInRange.reduce((s,x)=>s+(x.amount||0),0);
+    const monthSales=cache.sales.filter(s=>{const ds=tsToDateStr(s.createdAt);return ds&&ds.startsWith(tm);}).reduce((s,x)=>s+(x.total||0),0);
+    g('lbl-sales').textContent=hasRange?'Ventas en rango':'Ventas hoy';g('sub-sales').textContent=hasRange?rangeLabel:'Este día';g('lbl-expenses').textContent=hasRange?'Gastos en rango':'Gastos hoy';g('sub-expenses').textContent=hasRange?rangeLabel:'Este día';g('lbl-result').textContent=hasRange?'Resultado rango':'Resultado hoy';g('lbl-appts').textContent=hasRange?'Turnos en rango':'Turnos hoy';g('lbl-completed').textContent=hasRange?'Cumplidos rango':'Cumplidos hoy';g('lbl-cancelled').textContent=hasRange?'Cancelados rango':'Cancelados hoy';
+    g('stat-today').textContent=fmt$(sumSales);g('stat-month').textContent=fmt$(monthSales);g('stat-expenses').textContent=fmt$(sumExp);
+    const res=sumSales-sumExp;g('stat-result').textContent=fmt$(res);g('stat-result').style.color=res>=0?'var(--success)':'var(--danger)';
+    g('stat-appts').textContent=apptsInRange.filter(a=>a.status==='scheduled').length;g('stat-completed').textContent=apptsInRange.filter(a=>a.status==='completed').length;g('stat-cancelled').textContent=apptsInRange.filter(a=>a.status==='cancelled').length;g('stat-clients').textContent=cache.clients.length;
+    const upcoming=cache.appointments.filter(a=>a.date>=td&&a.status==='scheduled').sort((a,b)=>(a.date+a.startTime).localeCompare(b.date+b.startTime)).slice(0,5);
+    g('dash-appts').innerHTML=upcoming.length?upcoming.map(a=>{const cl=cache.clients.find(c=>c.id===a.clientId),tr=cache.treatments.find(t=>t.id===a.treatmentId);return `<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)"><div><div style="font-weight:500">${cl?esc(cl.name):'—'}</div><div style="font-size:11px;color:var(--text2)">${tr?esc(tr.name):'—'}</div></div><div style="text-align:right"><div style="font-size:12px">${a.date}</div><div style="font-size:12px;color:var(--accent);font-weight:600">${a.startTime||''}</div></div></div>`;}).join(''):'<div class="empty">Sin turnos próximos</div>';
+    const ls=cache.products.filter(p=>p.stock<=5).sort((a,b)=>a.stock-b.stock).slice(0,5);
+    g('dash-stock').innerHTML=ls.length?ls.map(p=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-weight:500">${esc(p.name)}</span><span style="color:${p.stock<=2?'var(--danger)':'var(--accent)'};font-weight:600">Stock: ${p.stock}</span></div>`).join(''):'<div class="empty">✓ Stock normal</div>';
+    const rs=(hasRange?salesInRange:[...cache.sales]).sort((a,b)=>{const da=a.createdAt?.toDate?.()??new Date(0),db_=b.createdAt?.toDate?.()??new Date(0);return db_-da;}).slice(0,5);
+    g('dash-sales').innerHTML=rs.length?`<table><thead><tr><th>Fecha</th><th>Cliente</th><th>Total</th></tr></thead><tbody>${rs.map(s=>{const cl=cache.clients.find(c=>c.id===s.clientId);return `<tr><td>${fmtDate(s.createdAt)}</td><td>${cl?esc(cl.name):'—'}</td><td style="color:var(--accent);font-weight:700">${fmt$(s.total)}</td></tr>`;}).join('')}</tbody></table>`:'<div class="empty">Sin ventas</div>';
+    const rg=(hasRange?expensesInRange:[...cache.expenses]).sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,5);
+    g('dash-expenses').innerHTML=rg.length?`<table><thead><tr><th>Fecha</th><th>Descripción</th><th>Monto</th></tr></thead><tbody>${rg.map(e=>`<tr><td>${e.date||'-'}</td><td>${esc(e.description)}</td><td style="color:var(--danger);font-weight:700">${fmt$(e.amount)}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">Sin gastos</div>';
+  }
+
+  // INIT
+  const savedCfg=loadConfig();
+  if(savedCfg?.apiKey){g('loading-msg').textContent='Conectando...';initFirebase(savedCfg);}
+  else{hideLoading();g('login-screen').classList.add('show');g('sidebar').style.display='none';g('main').style.display='none';window.doGoogleLogin=function(){toast('Primero configurá Firebase para poder iniciar sesión','error');setTimeout(()=>window.showConfigModal(),300);};}
+</script>
 </body>
 </html>
