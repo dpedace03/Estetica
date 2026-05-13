@@ -6,11 +6,6 @@
   <title>Aesthetix Pro — Gestión Integral</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-  <!-- Firebase compat SDK — NO requiere módulos ES, funciona directo en el navegador -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
   <style>
     :root{--bg:#0f0f10;--surface:#18181b;--surface2:#1f1f23;--border:#2a2a30;--accent:#c8a97e;--accent2:#e8c99e;--danger:#e05a5a;--success:#5ab88a;--text:#f0ece4;--text2:#9c9898;--text3:#5c5858}
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -33,12 +28,9 @@
     .page{display:none;padding:28px}
     .page.active{display:block}
     .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
-    .btn-primary{background:var(--accent);color:#1a1208}
-    .btn-primary:hover{background:var(--accent2)}
-    .btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
-    .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
-    .btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger)}
-    .btn-danger:hover{background:var(--danger);color:#fff}
+    .btn-primary{background:var(--accent);color:#1a1208}.btn-primary:hover{background:var(--accent2)}
+    .btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger)}.btn-danger:hover{background:var(--danger);color:#fff}
     .btn-sm{padding:5px 10px;font-size:12px}
     .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px}
     .card-title{font-family:'Playfair Display',serif;font-size:14px;color:var(--accent2);margin-bottom:4px}
@@ -76,9 +68,8 @@
     .section-title{font-family:'Playfair Display',serif;font-size:15px;margin-bottom:12px}
     .mt-24{margin-top:24px}
     #toast{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px}
-    .toast-msg{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13px;animation:slideIn .2s ease;box-shadow:0 4px 20px rgba(0,0,0,.4)}
-    .toast-msg.success{border-color:var(--success)}
-    .toast-msg.error{border-color:var(--danger)}
+    .toast-msg{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13px;animation:slideIn .2s ease;box-shadow:0 4px 20px rgba(0,0,0,.4);min-width:220px}
+    .toast-msg.success{border-color:var(--success)}.toast-msg.error{border-color:var(--danger)}
     @keyframes slideIn{from{transform:translateX(60px);opacity:0}to{transform:translateX(0);opacity:1}}
     .loader{text-align:center;padding:40px;color:var(--text3)}
     .spinner{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--accent);animation:spin .7s linear infinite;margin:0 auto 10px}
@@ -95,9 +86,19 @@
     }
     .overlay-mobile{display:none;position:fixed;inset:0;z-index:99}
     .overlay-mobile.show{display:block}
+    #loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:16px}
+    #loading-screen h2{font-family:'Playfair Display',serif;color:var(--accent);font-size:22px}
+    #loading-screen p{color:var(--text3);font-size:13px}
   </style>
 </head>
 <body>
+
+<!-- Pantalla de carga mientras se inicializa Firebase -->
+<div id="loading-screen">
+  <div class="spinner" style="width:40px;height:40px"></div>
+  <h2>Aesthetix Pro</h2>
+  <p id="loading-msg">Iniciando...</p>
+</div>
 
 <div class="overlay-mobile" id="mobileOverlay" onclick="closeSidebar()"></div>
 
@@ -130,7 +131,6 @@
     <button class="btn btn-ghost btn-sm" onclick="showConfigModal()">⚙ Firebase</button>
   </div>
 
-  <!-- DASHBOARD -->
   <div class="page active" id="page-dashboard">
     <div class="grid-4">
       <div class="card"><div class="card-title">Ventas hoy</div><div class="card-value" id="stat-today">$0</div><div class="card-sub">Este día</div></div>
@@ -145,7 +145,6 @@
     <div class="card mt-24"><div class="section-title">Últimas ventas</div><div id="dash-sales"><div class="loader"><div class="spinner"></div>Cargando...</div></div></div>
   </div>
 
-  <!-- TURNOS -->
   <div class="page" id="page-appointments">
     <div class="toolbar">
       <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="appt-search" placeholder="Buscar..." oninput="filterTable('appts-body','appt-search')"></div>
@@ -155,7 +154,6 @@
     <div class="card"><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Hora</th><th>Cliente</th><th>Tratamiento</th><th>Empleado</th><th>Estado</th><th></th></tr></thead><tbody id="appts-body"><tr><td colspan="7"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
   </div>
 
-  <!-- VENTAS -->
   <div class="page" id="page-sales">
     <div class="toolbar">
       <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="sale-search" placeholder="Buscar..." oninput="filterTable('sales-body','sale-search')"></div>
@@ -164,7 +162,6 @@
     <div class="card"><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Cliente</th><th>Items</th><th>Total</th><th>Pago</th><th>Empleado</th><th></th></tr></thead><tbody id="sales-body"><tr><td colspan="7"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
   </div>
 
-  <!-- GASTOS -->
   <div class="page" id="page-expenses">
     <div class="toolbar">
       <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="exp-search" placeholder="Buscar..." oninput="filterTable('exps-body','exp-search')"></div>
@@ -173,7 +170,6 @@
     <div class="card"><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Descripción</th><th>Categoría</th><th>Monto</th><th></th></tr></thead><tbody id="exps-body"><tr><td colspan="5"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
   </div>
 
-  <!-- TRATAMIENTOS -->
   <div class="page" id="page-treatments">
     <div class="toolbar">
       <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="treat-search" placeholder="Buscar..." oninput="filterTable('treats-body','treat-search')"></div>
@@ -182,7 +178,6 @@
     <div class="card"><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Categoría</th><th>Duración (min)</th><th>Precio</th><th></th></tr></thead><tbody id="treats-body"><tr><td colspan="5"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
   </div>
 
-  <!-- PRODUCTOS -->
   <div class="page" id="page-products">
     <div class="toolbar">
       <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="prod-search" placeholder="Buscar..." oninput="filterTable('prods-body','prod-search')"></div>
@@ -191,7 +186,6 @@
     <div class="card"><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Categoría</th><th>Stock</th><th>Precio</th><th>Código</th><th></th></tr></thead><tbody id="prods-body"><tr><td colspan="6"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
   </div>
 
-  <!-- CLIENTES -->
   <div class="page" id="page-clients">
     <div class="toolbar">
       <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="client-search" placeholder="Buscar..." oninput="filterTable('clients-body','client-search')"></div>
@@ -200,7 +194,6 @@
     <div class="card"><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Notas</th><th></th></tr></thead><tbody id="clients-body"><tr><td colspan="5"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
   </div>
 
-  <!-- EMPLEADOS -->
   <div class="page" id="page-employees">
     <div class="toolbar">
       <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="emp-search" placeholder="Buscar..." oninput="filterTable('emps-body','emp-search')"></div>
@@ -209,7 +202,6 @@
     <div class="card"><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Rol</th><th>Comisión %</th><th></th></tr></thead><tbody id="emps-body"><tr><td colspan="6"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
   </div>
 
-  <!-- COMISIONES -->
   <div class="page" id="page-commissions">
     <div class="toolbar"><div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="comm-search" placeholder="Buscar..." oninput="filterTable('comms-body','comm-search')"></div></div>
     <div class="card"><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Empleado</th><th>Venta ID</th><th>Monto</th></tr></thead><tbody id="comms-body"><tr><td colspan="4"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
@@ -220,7 +212,7 @@
 <div class="modal-overlay" id="config-modal">
   <div class="modal" style="max-width:460px">
     <h3>⚙ Configurar Firebase</h3>
-    <p style="color:var(--text2);font-size:13px;margin-bottom:20px">Completá con los datos de tu proyecto Firebase. Se guardan en el navegador.</p>
+    <p style="color:var(--text2);font-size:13px;margin-bottom:20px">Completá con los datos de tu proyecto. Se guardan en el navegador.</p>
     <div class="form-group"><label>API Key</label><input id="cfg-apiKey" placeholder="AIzaSy..."></div>
     <div class="form-group"><label>Auth Domain</label><input id="cfg-authDomain" placeholder="proyecto.firebaseapp.com"></div>
     <div class="form-group"><label>Project ID</label><input id="cfg-projectId" placeholder="mi-proyecto"></div>
@@ -234,8 +226,7 @@
 
 <div class="modal-overlay" id="appt-modal">
   <div class="modal">
-    <h3 id="appt-modal-title">Nuevo Turno</h3>
-    <input type="hidden" id="appt-id">
+    <h3 id="appt-modal-title">Nuevo Turno</h3><input type="hidden" id="appt-id">
     <div class="form-row"><div class="form-group"><label>Fecha</label><input type="date" id="appt-date"></div><div class="form-group"><label>Hora inicio</label><input type="time" id="appt-start"></div></div>
     <div class="form-row"><div class="form-group"><label>Hora fin</label><input type="time" id="appt-end"></div><div class="form-group"><label>Estado</label><select id="appt-status"><option value="scheduled">Programado</option><option value="completed">Completado</option><option value="cancelled">Cancelado</option></select></div></div>
     <div class="form-group"><label>Cliente</label><select id="appt-client"><option value="">Seleccionar...</option></select></div>
@@ -269,8 +260,7 @@
 
 <div class="modal-overlay" id="exp-modal">
   <div class="modal">
-    <h3 id="exp-modal-title">Nuevo Gasto</h3>
-    <input type="hidden" id="exp-id">
+    <h3 id="exp-modal-title">Nuevo Gasto</h3><input type="hidden" id="exp-id">
     <div class="form-group"><label>Descripción</label><input id="exp-desc"></div>
     <div class="form-row"><div class="form-group"><label>Monto ($)</label><input type="number" id="exp-amount" min="0"></div><div class="form-group"><label>Fecha</label><input type="date" id="exp-date"></div></div>
     <div class="form-group"><label>Categoría</label><input id="exp-category" placeholder="Ej: suministros..."></div>
@@ -280,20 +270,18 @@
 
 <div class="modal-overlay" id="treat-modal">
   <div class="modal">
-    <h3 id="treat-modal-title">Nuevo Tratamiento</h3>
-    <input type="hidden" id="treat-id">
+    <h3 id="treat-modal-title">Nuevo Tratamiento</h3><input type="hidden" id="treat-id">
     <div class="form-group"><label>Nombre</label><input id="treat-name"></div>
     <div class="form-group"><label>Descripción</label><textarea id="treat-desc"></textarea></div>
     <div class="form-row"><div class="form-group"><label>Duración (min)</label><input type="number" id="treat-duration" min="1"></div><div class="form-group"><label>Precio ($)</label><input type="number" id="treat-price" min="0"></div></div>
-    <div class="form-group"><label>Categoría</label><input id="treat-category" placeholder="Ej: facial, corporal..."></div>
+    <div class="form-group"><label>Categoría</label><input id="treat-category"></div>
     <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('treat-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveTreatment()">Guardar</button></div>
   </div>
 </div>
 
 <div class="modal-overlay" id="prod-modal">
   <div class="modal">
-    <h3 id="prod-modal-title">Nuevo Producto</h3>
-    <input type="hidden" id="prod-id">
+    <h3 id="prod-modal-title">Nuevo Producto</h3><input type="hidden" id="prod-id">
     <div class="form-group"><label>Nombre</label><input id="prod-name"></div>
     <div class="form-group"><label>Descripción</label><textarea id="prod-desc"></textarea></div>
     <div class="form-row"><div class="form-group"><label>Precio ($)</label><input type="number" id="prod-price" min="0"></div><div class="form-group"><label>Stock</label><input type="number" id="prod-stock" min="0"></div></div>
@@ -304,8 +292,7 @@
 
 <div class="modal-overlay" id="client-modal">
   <div class="modal">
-    <h3 id="client-modal-title">Nuevo Cliente</h3>
-    <input type="hidden" id="client-id">
+    <h3 id="client-modal-title">Nuevo Cliente</h3><input type="hidden" id="client-id">
     <div class="form-group"><label>Nombre</label><input id="client-name"></div>
     <div class="form-row"><div class="form-group"><label>Email</label><input type="email" id="client-email"></div><div class="form-group"><label>Teléfono</label><input id="client-phone"></div></div>
     <div class="form-group"><label>Notas</label><textarea id="client-notes" placeholder="Historial, alergias, preferencias..."></textarea></div>
@@ -315,354 +302,431 @@
 
 <div class="modal-overlay" id="emp-modal">
   <div class="modal">
-    <h3 id="emp-modal-title">Nuevo Empleado</h3>
-    <input type="hidden" id="emp-id">
+    <h3 id="emp-modal-title">Nuevo Empleado</h3><input type="hidden" id="emp-id">
     <div class="form-group"><label>Nombre</label><input id="emp-name"></div>
     <div class="form-row"><div class="form-group"><label>Email</label><input type="email" id="emp-email"></div><div class="form-group"><label>Teléfono</label><input id="emp-phone"></div></div>
-    <div class="form-row"><div class="form-group"><label>Rol</label><input id="emp-role" placeholder="Ej: esteticista..."></div><div class="form-group"><label>Comisión (%)</label><input type="number" id="emp-commission" min="0" max="100"></div></div>
+    <div class="form-row"><div class="form-group"><label>Rol</label><input id="emp-role"></div><div class="form-group"><label>Comisión (%)</label><input type="number" id="emp-commission" min="0" max="100"></div></div>
     <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('emp-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveEmployee()">Guardar</button></div>
   </div>
 </div>
 
 <div id="toast"></div>
 
-<script>
-  var db = null;
-  var cache = {clients:[],employees:[],treatments:[],products:[],appointments:[],sales:[],expenses:[],commissions:[]};
-  var saleItems = [];
-  var CFG_KEY = 'aesthetix_cfg_v2';
+<script type="module">
+  // Usamos el SDK modular de Firebase via CDN (soporta database ID personalizado)
+  import { initializeApp, getApps, deleteApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+  import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-  // CONFIG
+  // ── ESTADO ────────────────────────────────────────────────────────
+  let db = null;
+  let saleItems = [];
+  const cache = {clients:[],employees:[],treatments:[],products:[],appointments:[],sales:[],expenses:[],commissions:[]};
+  const CFG_KEY = 'aesthetix_cfg_v3';
+
+  // ── HELPERS UI ────────────────────────────────────────────────────
+  const g = id => document.getElementById(id);
+  const v = id => { const el=g(id); return el ? el.value.trim() : ''; };
+  const set = (id, val) => { const el=g(id); if(el) el.value = val ?? ''; };
+  const esc = s => { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; };
+  const fmt$ = n => '$'+Number(n||0).toLocaleString('es-AR',{minimumFractionDigits:2});
+  const fmtDate = ts => { if(!ts) return '-'; const d=ts.toDate?ts.toDate():new Date(ts); return d.toLocaleDateString('es-AR'); };
+  const todayStr = () => new Date().toISOString().split('T')[0];
+  const rst = ids => ids.forEach(id => set(id,''));
+  const statusLabel = s => ({scheduled:'Programado',completed:'Completado',cancelled:'Cancelado'}[s]||s);
+  const emptyRow = (id,cols,msg) => g(id).innerHTML=`<tr><td colspan="${cols}"><div class="empty">${msg||'Sin registros'}</div></td></tr>`;
+
+  function toast(msg, type='success') {
+    const el = document.createElement('div');
+    el.className = 'toast-msg '+type;
+    el.textContent = (type==='success'?'✓ ':'✕ ')+msg;
+    g('toast').appendChild(el);
+    setTimeout(()=>el.remove(), 4000);
+  }
+  function openModal(id){ g(id).classList.add('open'); }
+  function closeModal(id){ g(id).classList.remove('open'); }
+  function needsDb(){ if(!db){ toast('Primero configurá Firebase','error'); showConfigModal(); return true; } return false; }
+
+  // Exponer funciones al HTML (onclick)
+  window.closeModal = closeModal;
+  window.openModal = openModal;
+  window.toast = toast;
+  window.filterTable = (tbodyId, searchId) => {
+    const q = g(searchId).value.toLowerCase();
+    document.querySelectorAll(`#${tbodyId} tr`).forEach(r => r.style.display = r.textContent.toLowerCase().includes(q)?'':'none');
+  };
+  window.toggleSidebar = () => { g('sidebar').classList.toggle('open'); g('mobileOverlay').classList.toggle('show'); };
+  window.closeSidebar = () => { g('sidebar').classList.remove('open'); g('mobileOverlay').classList.remove('show'); };
+
+  // ── CONFIG ────────────────────────────────────────────────────────
   function loadConfig(){ try{ return JSON.parse(localStorage.getItem(CFG_KEY)); }catch(e){ return null; } }
 
-  function doSaveConfig(){
-    var cfg = {
+  window.showConfigModal = function() {
+    const cfg = loadConfig() || {};
+    set('cfg-apiKey', cfg.apiKey); set('cfg-authDomain', cfg.authDomain);
+    set('cfg-projectId', cfg.projectId); set('cfg-storageBucket', cfg.storageBucket);
+    set('cfg-messagingSenderId', cfg.messagingSenderId); set('cfg-appId', cfg.appId);
+    set('cfg-dbId', cfg.firestoreDatabaseId);
+    openModal('config-modal');
+  };
+
+  window.doSaveConfig = function() {
+    const cfg = {
       apiKey: v('cfg-apiKey'), authDomain: v('cfg-authDomain'), projectId: v('cfg-projectId'),
       storageBucket: v('cfg-storageBucket'), messagingSenderId: v('cfg-messagingSenderId'),
       appId: v('cfg-appId'), firestoreDatabaseId: v('cfg-dbId') || '(default)'
     };
-    if (!cfg.apiKey || !cfg.projectId){ toast('Completá API Key y Project ID','error'); return; }
+    if (!cfg.apiKey || !cfg.projectId) { toast('Completá API Key y Project ID','error'); return; }
     localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
     closeModal('config-modal');
     initFirebase(cfg);
-  }
+  };
 
-  function showConfigModal(){
-    var cfg = loadConfig() || {};
-    set('cfg-apiKey', cfg.apiKey||''); set('cfg-authDomain', cfg.authDomain||'');
-    set('cfg-projectId', cfg.projectId||''); set('cfg-storageBucket', cfg.storageBucket||'');
-    set('cfg-messagingSenderId', cfg.messagingSenderId||''); set('cfg-appId', cfg.appId||'');
-    set('cfg-dbId', cfg.firestoreDatabaseId||'');
-    openModal('config-modal');
-  }
-
-  function initFirebase(cfg){
-    try{ firebase.apps.forEach(function(a){ a.delete(); }); }catch(e){}
-    try{
-      var app = firebase.initializeApp(cfg);
-      db = firebase.firestore(app);
+  function initFirebase(cfg) {
+    // Eliminar apps previas
+    getApps().forEach(app => { try{ deleteApp(app); }catch(e){} });
+    try {
+      const app = initializeApp(cfg);
+      const dbId = cfg.firestoreDatabaseId && cfg.firestoreDatabaseId !== '(default)' ? cfg.firestoreDatabaseId : undefined;
+      db = dbId ? getFirestore(app, dbId) : getFirestore(app);
+      hideLoading();
       toast('Firebase conectado ✓','success');
       loadAll();
-    }catch(e){ toast('Error: '+e.message,'error'); }
+    } catch(e) {
+      hideLoading();
+      toast('Error Firebase: '+e.message,'error');
+      console.error(e);
+    }
   }
 
-  // HELPERS
-  function v(id){ var el=document.getElementById(id); return el ? el.value.trim() : ''; }
-  function set(id, val){ var el=document.getElementById(id); if(el) el.value=val; }
-  function g(id){ return document.getElementById(id); }
-  function fmt$(n){ return '$'+Number(n||0).toLocaleString('es-AR',{minimumFractionDigits:2}); }
-  function fmtDate(ts){ if(!ts) return '-'; var d=ts.toDate?ts.toDate():new Date(ts); return d.toLocaleDateString('es-AR'); }
-  function todayStr(){ return new Date().toISOString().split('T')[0]; }
-  function needsDb(){ if(!db){ toast('Primero configurá Firebase','error'); showConfigModal(); return true; } return false; }
-  function rst(ids){ ids.forEach(function(id){ set(id,''); }); }
-  function statusLabel(s){ return {scheduled:'Programado',completed:'Completado',cancelled:'Cancelado'}[s]||s; }
-  function emptyRow(id,cols,msg){ g(id).innerHTML='<tr><td colspan="'+cols+'"><div class="empty">'+(msg||'Sin registros')+'</div></td></tr>'; }
-
-  // TOAST
-  function toast(msg,type){
-    type=type||'success';
-    var el=document.createElement('div');
-    el.className='toast-msg '+type;
-    el.textContent=(type==='success'?'✓ ':'✕ ')+msg;
-    g('toast').appendChild(el);
-    setTimeout(function(){ el.remove(); },3500);
+  function hideLoading() {
+    const ls = g('loading-screen');
+    if (ls) ls.style.display = 'none';
   }
 
-  // MODAL
-  function openModal(id){ g(id).classList.add('open'); }
-  function closeModal(id){ g(id).classList.remove('open'); }
-  document.querySelectorAll('.modal-overlay').forEach(function(m){
-    m.addEventListener('click',function(e){ if(e.target===m) m.classList.remove('open'); });
-  });
-
-  // NAV
-  var pageTitles={dashboard:'Dashboard',appointments:'Turnos',sales:'Ventas',expenses:'Gastos',treatments:'Tratamientos',products:'Productos',clients:'Clientes',employees:'Empleados',commissions:'Comisiones'};
-  document.querySelectorAll('.nav-item').forEach(function(item){
-    item.addEventListener('click',function(){
-      var page=item.dataset.page;
-      document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
-      document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  // ── NAV ───────────────────────────────────────────────────────────
+  const pageTitles = {dashboard:'Dashboard',appointments:'Turnos',sales:'Ventas',expenses:'Gastos',treatments:'Tratamientos',products:'Productos',clients:'Clientes',employees:'Empleados',commissions:'Comisiones'};
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const page = item.dataset.page;
+      document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
       item.classList.add('active');
       g('page-'+page).classList.add('active');
-      g('pageTitle').textContent=pageTitles[page];
-      closeSidebar();
+      g('pageTitle').textContent = pageTitles[page];
+      window.closeSidebar();
     });
   });
-  function toggleSidebar(){ g('sidebar').classList.toggle('open'); g('mobileOverlay').classList.toggle('show'); }
-  function closeSidebar(){ g('sidebar').classList.remove('open'); g('mobileOverlay').classList.remove('show'); }
-  function filterTable(tbodyId,searchId){
-    var q=g(searchId).value.toLowerCase();
-    document.querySelectorAll('#'+tbodyId+' tr').forEach(function(r){ r.style.display=r.textContent.toLowerCase().includes(q)?'':'none'; });
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
+  });
+
+  // ── LOAD ALL ──────────────────────────────────────────────────────
+  async function loadAll() {
+    if (!db) return;
+    await Promise.all([loadClients(),loadEmployees(),loadTreatments(),loadProducts(),loadAppointments(),loadSales(),loadExpenses(),loadCommissions()]);
+    renderDashboard();
   }
 
-  // LOAD ALL
-  function loadAll(){
-    if(!db) return;
-    Promise.all([loadClients(),loadEmployees(),loadTreatments(),loadProducts(),loadAppointments(),loadSales(),loadExpenses(),loadCommissions()])
-      .then(function(){ renderDashboard(); });
+  // ── CRUD GENÉRICO ─────────────────────────────────────────────────
+  async function getAll(col) {
+    const snap = await getDocs(collection(db, col));
+    return snap.docs.map(d => ({id:d.id,...d.data()}));
   }
+  async function addOne(col, data) { return addDoc(collection(db, col), data); }
+  async function updateOne(col, id, data) { return updateDoc(doc(db, col, id), data); }
+  async function deleteOne(col, id) { return deleteDoc(doc(db, col, id)); }
 
-  // CLIENTS
-  function loadClients(){ return db.collection('clients').get().then(function(s){ cache.clients=s.docs.map(function(d){ return Object.assign({id:d.id},d.data()); }); renderClients(); populateSelects(); }); }
-  function renderClients(){
-    if(!cache.clients.length){ emptyRow('clients-body',5); return; }
-    g('clients-body').innerHTML=cache.clients.map(function(c){
-      return '<tr><td>'+esc(c.name)+'</td><td>'+(c.email||'-')+'</td><td>'+(c.phone||'-')+'</td>'
-        +'<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(c.notes||'-')+'</td>'
-        +'<td><button class="btn btn-ghost btn-sm" onclick="editClient(\''+c.id+'\')">✏</button> <button class="btn btn-danger btn-sm" onclick="delDoc(\'clients\',\''+c.id+'\',loadClients)">🗑</button></td></tr>';
-    }).join('');
-    g('stat-clients').textContent=cache.clients.length;
+  // ── CLIENTS ───────────────────────────────────────────────────────
+  async function loadClients() { cache.clients = await getAll('clients'); renderClients(); populateSelects(); }
+  function renderClients() {
+    if (!cache.clients.length) { emptyRow('clients-body',5); return; }
+    g('clients-body').innerHTML = cache.clients.map(c =>
+      `<tr><td>${esc(c.name)}</td><td>${c.email||'-'}</td><td>${c.phone||'-'}</td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.notes||'-'}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="window._editClient('${c.id}')">✏</button> <button class="btn btn-danger btn-sm" onclick="window._del('clients','${c.id}')">🗑</button></td></tr>`
+    ).join('');
+    g('stat-clients').textContent = cache.clients.length;
   }
-  function openClientModal(){ rst(['client-id','client-name','client-email','client-phone','client-notes']); set('client-modal-title','Nuevo Cliente'); openModal('client-modal'); }
-  function editClient(id){ var c=cache.clients.find(function(x){return x.id===id;}); if(!c) return; set('client-modal-title','Editar Cliente'); set('client-id',c.id); set('client-name',c.name); set('client-email',c.email||''); set('client-phone',c.phone||''); set('client-notes',c.notes||''); openModal('client-modal'); }
-  function saveClient(){
-    if(needsDb()) return;
-    var id=v('client-id');
-    var data={name:v('client-name'),email:v('client-email'),phone:v('client-phone'),notes:v('client-notes')};
-    if(!data.name){ toast('El nombre es requerido','error'); return; }
-    var p=id?db.collection('clients').doc(id).update(data):db.collection('clients').add(Object.assign(data,{createdAt:firebase.firestore.FieldValue.serverTimestamp()}));
-    p.then(function(){ closeModal('client-modal'); toast('Cliente guardado'); loadClients(); }).catch(function(e){ toast(e.message,'error'); });
-  }
+  window.openClientModal = () => { rst(['client-id','client-name','client-email','client-phone','client-notes']); set('client-modal-title','Nuevo Cliente'); openModal('client-modal'); };
+  window._editClient = id => {
+    const c = cache.clients.find(x=>x.id===id); if(!c) return;
+    set('client-modal-title','Editar Cliente'); set('client-id',c.id); set('client-name',c.name);
+    set('client-email',c.email); set('client-phone',c.phone); set('client-notes',c.notes);
+    openModal('client-modal');
+  };
+  window.saveClient = async () => {
+    if (needsDb()) return;
+    const id = v('client-id');
+    const data = {name:v('client-name'),email:v('client-email'),phone:v('client-phone'),notes:v('client-notes')};
+    if (!data.name) { toast('El nombre es requerido','error'); return; }
+    try {
+      if (id) await updateOne('clients',id,data);
+      else await addOne('clients',{...data, createdAt:serverTimestamp()});
+      closeModal('client-modal'); toast('Cliente guardado'); await loadClients();
+    } catch(e) { toast(e.message,'error'); console.error(e); }
+  };
 
-  // EMPLOYEES
-  function loadEmployees(){ return db.collection('employees').get().then(function(s){ cache.employees=s.docs.map(function(d){ return Object.assign({id:d.id},d.data()); }); renderEmployees(); populateSelects(); }); }
-  function renderEmployees(){
-    if(!cache.employees.length){ emptyRow('emps-body',6); return; }
-    g('emps-body').innerHTML=cache.employees.map(function(e){
-      return '<tr><td>'+esc(e.name)+'</td><td>'+e.email+'</td><td>'+(e.phone||'-')+'</td><td>'+(e.role||'-')+'</td><td>'+(e.commissionRate||0)+'%</td>'
-        +'<td><button class="btn btn-ghost btn-sm" onclick="editEmployee(\''+e.id+'\')">✏</button> <button class="btn btn-danger btn-sm" onclick="delDoc(\'employees\',\''+e.id+'\',loadEmployees)">🗑</button></td></tr>';
-    }).join('');
+  // ── EMPLOYEES ─────────────────────────────────────────────────────
+  async function loadEmployees() { cache.employees = await getAll('employees'); renderEmployees(); populateSelects(); }
+  function renderEmployees() {
+    if (!cache.employees.length) { emptyRow('emps-body',6); return; }
+    g('emps-body').innerHTML = cache.employees.map(e =>
+      `<tr><td>${esc(e.name)}</td><td>${e.email}</td><td>${e.phone||'-'}</td><td>${e.role||'-'}</td><td>${e.commissionRate||0}%</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="window._editEmp('${e.id}')">✏</button> <button class="btn btn-danger btn-sm" onclick="window._del('employees','${e.id}')">🗑</button></td></tr>`
+    ).join('');
   }
-  function openEmpModal(){ rst(['emp-id','emp-name','emp-email','emp-phone','emp-role','emp-commission']); set('emp-modal-title','Nuevo Empleado'); openModal('emp-modal'); }
-  function editEmployee(id){ var e=cache.employees.find(function(x){return x.id===id;}); if(!e) return; set('emp-modal-title','Editar Empleado'); set('emp-id',e.id); set('emp-name',e.name); set('emp-email',e.email); set('emp-phone',e.phone||''); set('emp-role',e.role||''); set('emp-commission',e.commissionRate||''); openModal('emp-modal'); }
-  function saveEmployee(){
-    if(needsDb()) return;
-    var id=v('emp-id');
-    var data={name:v('emp-name'),email:v('emp-email'),phone:v('emp-phone'),role:v('emp-role'),commissionRate:parseFloat(v('emp-commission'))||0};
-    if(!data.name||!data.email){ toast('Nombre y email requeridos','error'); return; }
-    var p=id?db.collection('employees').doc(id).update(data):db.collection('employees').add(data);
-    p.then(function(){ closeModal('emp-modal'); toast('Empleado guardado'); loadEmployees(); }).catch(function(e){ toast(e.message,'error'); });
-  }
+  window.openEmpModal = () => { rst(['emp-id','emp-name','emp-email','emp-phone','emp-role','emp-commission']); set('emp-modal-title','Nuevo Empleado'); openModal('emp-modal'); };
+  window._editEmp = id => {
+    const e = cache.employees.find(x=>x.id===id); if(!e) return;
+    set('emp-modal-title','Editar Empleado'); set('emp-id',e.id); set('emp-name',e.name);
+    set('emp-email',e.email); set('emp-phone',e.phone); set('emp-role',e.role); set('emp-commission',e.commissionRate);
+    openModal('emp-modal');
+  };
+  window.saveEmployee = async () => {
+    if (needsDb()) return;
+    const id = v('emp-id');
+    const data = {name:v('emp-name'),email:v('emp-email'),phone:v('emp-phone'),role:v('emp-role'),commissionRate:parseFloat(v('emp-commission'))||0};
+    if (!data.name||!data.email) { toast('Nombre y email requeridos','error'); return; }
+    try {
+      if (id) await updateOne('employees',id,data); else await addOne('employees',data);
+      closeModal('emp-modal'); toast('Empleado guardado'); await loadEmployees();
+    } catch(e) { toast(e.message,'error'); console.error(e); }
+  };
 
-  // TREATMENTS
-  function loadTreatments(){ return db.collection('treatments').get().then(function(s){ cache.treatments=s.docs.map(function(d){ return Object.assign({id:d.id},d.data()); }); renderTreatments(); populateSelects(); }); }
-  function renderTreatments(){
-    if(!cache.treatments.length){ emptyRow('treats-body',5); return; }
-    g('treats-body').innerHTML=cache.treatments.map(function(t){
-      return '<tr><td>'+esc(t.name)+'</td><td>'+(t.category||'-')+'</td><td>'+(t.duration||'-')+'</td><td>'+fmt$(t.price)+'</td>'
-        +'<td><button class="btn btn-ghost btn-sm" onclick="editTreatment(\''+t.id+'\')">✏</button> <button class="btn btn-danger btn-sm" onclick="delDoc(\'treatments\',\''+t.id+'\',loadTreatments)">🗑</button></td></tr>';
-    }).join('');
+  // ── TREATMENTS ────────────────────────────────────────────────────
+  async function loadTreatments() { cache.treatments = await getAll('treatments'); renderTreatments(); populateSelects(); }
+  function renderTreatments() {
+    if (!cache.treatments.length) { emptyRow('treats-body',5); return; }
+    g('treats-body').innerHTML = cache.treatments.map(t =>
+      `<tr><td>${esc(t.name)}</td><td>${t.category||'-'}</td><td>${t.duration||'-'}</td><td>${fmt$(t.price)}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="window._editTreat('${t.id}')">✏</button> <button class="btn btn-danger btn-sm" onclick="window._del('treatments','${t.id}')">🗑</button></td></tr>`
+    ).join('');
   }
-  function openTreatModal(){ rst(['treat-id','treat-name','treat-desc','treat-duration','treat-price','treat-category']); set('treat-modal-title','Nuevo Tratamiento'); openModal('treat-modal'); }
-  function editTreatment(id){ var t=cache.treatments.find(function(x){return x.id===id;}); if(!t) return; set('treat-modal-title','Editar Tratamiento'); set('treat-id',t.id); set('treat-name',t.name); set('treat-desc',t.description||''); set('treat-duration',t.duration||''); set('treat-price',t.price||''); set('treat-category',t.category||''); openModal('treat-modal'); }
-  function saveTreatment(){
-    if(needsDb()) return;
-    var id=v('treat-id');
-    var data={name:v('treat-name'),description:v('treat-desc'),duration:parseFloat(v('treat-duration'))||0,price:parseFloat(v('treat-price'))||0,category:v('treat-category')};
-    if(!data.name){ toast('El nombre es requerido','error'); return; }
-    var p=id?db.collection('treatments').doc(id).update(data):db.collection('treatments').add(data);
-    p.then(function(){ closeModal('treat-modal'); toast('Tratamiento guardado'); loadTreatments(); }).catch(function(e){ toast(e.message,'error'); });
-  }
+  window.openTreatModal = () => { rst(['treat-id','treat-name','treat-desc','treat-duration','treat-price','treat-category']); set('treat-modal-title','Nuevo Tratamiento'); openModal('treat-modal'); };
+  window._editTreat = id => {
+    const t = cache.treatments.find(x=>x.id===id); if(!t) return;
+    set('treat-modal-title','Editar Tratamiento'); set('treat-id',t.id); set('treat-name',t.name);
+    set('treat-desc',t.description); set('treat-duration',t.duration); set('treat-price',t.price); set('treat-category',t.category);
+    openModal('treat-modal');
+  };
+  window.saveTreatment = async () => {
+    if (needsDb()) return;
+    const id = v('treat-id');
+    const data = {name:v('treat-name'),description:v('treat-desc'),duration:parseFloat(v('treat-duration'))||0,price:parseFloat(v('treat-price'))||0,category:v('treat-category')};
+    if (!data.name) { toast('El nombre es requerido','error'); return; }
+    try {
+      if (id) await updateOne('treatments',id,data); else await addOne('treatments',data);
+      closeModal('treat-modal'); toast('Tratamiento guardado'); await loadTreatments();
+    } catch(e) { toast(e.message,'error'); console.error(e); }
+  };
 
-  // PRODUCTS
-  function loadProducts(){ return db.collection('products').get().then(function(s){ cache.products=s.docs.map(function(d){ return Object.assign({id:d.id},d.data()); }); renderProducts(); populateSelects(); }); }
-  function renderProducts(){
-    if(!cache.products.length){ emptyRow('prods-body',6); return; }
-    g('prods-body').innerHTML=cache.products.map(function(p){
-      var low=p.stock<=3;
-      return '<tr><td>'+esc(p.name)+'</td><td>'+(p.category||'-')+'</td>'
-        +'<td style="color:'+(low?'var(--danger)':'inherit')+'">'+p.stock+(low?' ⚠':'')+'</td>'
-        +'<td>'+fmt$(p.price)+'</td><td style="font-size:11px;color:var(--text3)">'+(p.barcode||'-')+'</td>'
-        +'<td><button class="btn btn-ghost btn-sm" onclick="editProduct(\''+p.id+'\')">✏</button> <button class="btn btn-danger btn-sm" onclick="delDoc(\'products\',\''+p.id+'\',loadProducts)">🗑</button></td></tr>';
-    }).join('');
-  }
-  function openProdModal(){ rst(['prod-id','prod-name','prod-desc','prod-price','prod-stock','prod-category','prod-barcode']); set('prod-modal-title','Nuevo Producto'); openModal('prod-modal'); }
-  function editProduct(id){ var p=cache.products.find(function(x){return x.id===id;}); if(!p) return; set('prod-modal-title','Editar Producto'); set('prod-id',p.id); set('prod-name',p.name); set('prod-desc',p.description||''); set('prod-price',p.price||''); set('prod-stock',p.stock||''); set('prod-category',p.category||''); set('prod-barcode',p.barcode||''); openModal('prod-modal'); }
-  function saveProduct(){
-    if(needsDb()) return;
-    var id=v('prod-id');
-    var data={name:v('prod-name'),description:v('prod-desc'),price:parseFloat(v('prod-price'))||0,stock:parseInt(v('prod-stock'))||0,category:v('prod-category'),barcode:v('prod-barcode')};
-    if(!data.name){ toast('El nombre es requerido','error'); return; }
-    var p=id?db.collection('products').doc(id).update(data):db.collection('products').add(data);
-    p.then(function(){ closeModal('prod-modal'); toast('Producto guardado'); loadProducts(); }).catch(function(e){ toast(e.message,'error'); });
-  }
-
-  // APPOINTMENTS
-  function loadAppointments(){ return db.collection('appointments').get().then(function(s){ cache.appointments=s.docs.map(function(d){ return Object.assign({id:d.id},d.data()); }); renderAppointments(); }); }
-  function renderAppointments(){
-    var filter=g('appt-filter-status').value;
-    var list=cache.appointments.filter(function(a){ return !filter||a.status===filter; }).sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
-    if(!list.length){ emptyRow('appts-body',7); return; }
-    g('appts-body').innerHTML=list.map(function(a){
-      var cl=cache.clients.find(function(c){return c.id===a.clientId;}); var tr=cache.treatments.find(function(t){return t.id===a.treatmentId;}); var em=cache.employees.find(function(e){return e.id===a.employeeId;});
-      return '<tr><td>'+(a.date||'-')+'</td><td>'+(a.startTime||'-')+(a.endTime?' - '+a.endTime:'')+'</td>'
-        +'<td>'+(cl?esc(cl.name):'—')+'</td><td>'+(tr?esc(tr.name):'—')+'</td><td>'+(em?esc(em.name):'—')+'</td>'
-        +'<td><span class="badge badge-'+a.status+'">'+statusLabel(a.status)+'</span></td>'
-        +'<td><button class="btn btn-ghost btn-sm" onclick="editAppointment(\''+a.id+'\')">✏</button> <button class="btn btn-danger btn-sm" onclick="delDoc(\'appointments\',\''+a.id+'\',loadAppointments)">🗑</button></td></tr>';
-    }).join('');
-  }
-  function openApptModal(){ rst(['appt-id','appt-date','appt-start','appt-end','appt-notes']); set('appt-status','scheduled'); set('appt-modal-title','Nuevo Turno'); openModal('appt-modal'); }
-  function editAppointment(id){ var a=cache.appointments.find(function(x){return x.id===id;}); if(!a) return; set('appt-modal-title','Editar Turno'); set('appt-id',a.id); set('appt-date',a.date||''); set('appt-start',a.startTime||''); set('appt-end',a.endTime||''); set('appt-status',a.status||'scheduled'); set('appt-client',a.clientId||''); set('appt-treatment',a.treatmentId||''); set('appt-employee',a.employeeId||''); set('appt-notes',a.notes||''); openModal('appt-modal'); }
-  function saveAppointment(){
-    if(needsDb()) return;
-    var id=v('appt-id');
-    var data={date:v('appt-date'),startTime:v('appt-start'),endTime:v('appt-end'),status:v('appt-status'),clientId:v('appt-client'),treatmentId:v('appt-treatment'),employeeId:v('appt-employee'),notes:v('appt-notes')};
-    if(!data.date||!data.clientId){ toast('Fecha y cliente requeridos','error'); return; }
-    var p=id?db.collection('appointments').doc(id).update(data):db.collection('appointments').add(data);
-    p.then(function(){ closeModal('appt-modal'); toast('Turno guardado'); loadAppointments().then(renderDashboard); }).catch(function(e){ toast(e.message,'error'); });
-  }
-
-  // SALES
-  function loadSales(){ return db.collection('sales').get().then(function(s){ cache.sales=s.docs.map(function(d){ return Object.assign({id:d.id},d.data()); }); renderSales(); }); }
-  function renderSales(){
-    if(!cache.sales.length){ emptyRow('sales-body',7); return; }
-    var sorted=[].concat(cache.sales).sort(function(a,b){ var da=a.createdAt&&a.createdAt.toDate?a.createdAt.toDate():new Date(0); var db_=b.createdAt&&b.createdAt.toDate?b.createdAt.toDate():new Date(0); return db_-da; });
-    g('sales-body').innerHTML=sorted.map(function(s){
-      var cl=cache.clients.find(function(c){return c.id===s.clientId;}); var em=cache.employees.find(function(e){return e.id===s.employeeId;});
-      var items=(s.items||[]).map(function(i){return i.name+' x'+i.quantity;}).join(', ');
-      return '<tr><td>'+fmtDate(s.createdAt)+'</td><td>'+(cl?esc(cl.name):'—')+'</td>'
-        +'<td style="font-size:12px;color:var(--text2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+items+'</td>'
-        +'<td style="font-weight:600;color:var(--accent)">'+fmt$(s.total)+'</td><td>'+(s.paymentMethod||'-')+'</td><td>'+(em?esc(em.name):'—')+'</td>'
-        +'<td><button class="btn btn-danger btn-sm" onclick="delDoc(\'sales\',\''+s.id+'\',loadSales)">🗑</button></td></tr>';
+  // ── PRODUCTS ──────────────────────────────────────────────────────
+  async function loadProducts() { cache.products = await getAll('products'); renderProducts(); populateSelects(); }
+  function renderProducts() {
+    if (!cache.products.length) { emptyRow('prods-body',6); return; }
+    g('prods-body').innerHTML = cache.products.map(p => {
+      const low = p.stock <= 3;
+      return `<tr><td>${esc(p.name)}</td><td>${p.category||'-'}</td>
+      <td style="color:${low?'var(--danger)':'inherit'}">${p.stock}${low?' ⚠':''}</td>
+      <td>${fmt$(p.price)}</td><td style="font-size:11px;color:var(--text3)">${p.barcode||'-'}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="window._editProd('${p.id}')">✏</button> <button class="btn btn-danger btn-sm" onclick="window._del('products','${p.id}')">🗑</button></td></tr>`;
     }).join('');
   }
-  function openSaleModal(){ saleItems=[]; renderSaleItems(); openModal('sale-modal'); updateSaleItemRef(); }
-  function updateSaleItemRef(){
-    var type=g('sale-item-type').value; var list=type==='product'?cache.products:cache.treatments;
-    g('sale-item-ref').innerHTML='<option value="">Seleccionar...</option>'+list.map(function(x){return '<option value="'+x.id+'">'+esc(x.name)+' — '+fmt$(x.price)+'</option>';}).join('');
+  window.openProdModal = () => { rst(['prod-id','prod-name','prod-desc','prod-price','prod-stock','prod-category','prod-barcode']); set('prod-modal-title','Nuevo Producto'); openModal('prod-modal'); };
+  window._editProd = id => {
+    const p = cache.products.find(x=>x.id===id); if(!p) return;
+    set('prod-modal-title','Editar Producto'); set('prod-id',p.id); set('prod-name',p.name);
+    set('prod-desc',p.description); set('prod-price',p.price); set('prod-stock',p.stock); set('prod-category',p.category); set('prod-barcode',p.barcode);
+    openModal('prod-modal');
+  };
+  window.saveProduct = async () => {
+    if (needsDb()) return;
+    const id = v('prod-id');
+    const data = {name:v('prod-name'),description:v('prod-desc'),price:parseFloat(v('prod-price'))||0,stock:parseInt(v('prod-stock'))||0,category:v('prod-category'),barcode:v('prod-barcode')};
+    if (!data.name) { toast('El nombre es requerido','error'); return; }
+    try {
+      if (id) await updateOne('products',id,data); else await addOne('products',data);
+      closeModal('prod-modal'); toast('Producto guardado'); await loadProducts();
+    } catch(e) { toast(e.message,'error'); console.error(e); }
+  };
+
+  // ── APPOINTMENTS ──────────────────────────────────────────────────
+  async function loadAppointments() { cache.appointments = await getAll('appointments'); renderAppointments(); }
+  window.renderAppointments = function() {
+    const filter = g('appt-filter-status').value;
+    const list = cache.appointments.filter(a=>!filter||a.status===filter).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+    if (!list.length) { emptyRow('appts-body',7); return; }
+    g('appts-body').innerHTML = list.map(a => {
+      const cl=cache.clients.find(c=>c.id===a.clientId), tr=cache.treatments.find(t=>t.id===a.treatmentId), em=cache.employees.find(e=>e.id===a.employeeId);
+      return `<tr><td>${a.date||'-'}</td><td>${a.startTime||'-'}${a.endTime?' - '+a.endTime:''}</td>
+      <td>${cl?esc(cl.name):'—'}</td><td>${tr?esc(tr.name):'—'}</td><td>${em?esc(em.name):'—'}</td>
+      <td><span class="badge badge-${a.status}">${statusLabel(a.status)}</span></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="window._editAppt('${a.id}')">✏</button> <button class="btn btn-danger btn-sm" onclick="window._del('appointments','${a.id}')">🗑</button></td></tr>`;
+    }).join('');
+  };
+  window.openApptModal = () => { rst(['appt-id','appt-date','appt-start','appt-end','appt-notes']); set('appt-status','scheduled'); set('appt-modal-title','Nuevo Turno'); openModal('appt-modal'); };
+  window._editAppt = id => {
+    const a = cache.appointments.find(x=>x.id===id); if(!a) return;
+    set('appt-modal-title','Editar Turno'); set('appt-id',a.id); set('appt-date',a.date); set('appt-start',a.startTime);
+    set('appt-end',a.endTime); set('appt-status',a.status); set('appt-client',a.clientId);
+    set('appt-treatment',a.treatmentId); set('appt-employee',a.employeeId); set('appt-notes',a.notes);
+    openModal('appt-modal');
+  };
+  window.saveAppointment = async () => {
+    if (needsDb()) return;
+    const id = v('appt-id');
+    const data = {date:v('appt-date'),startTime:v('appt-start'),endTime:v('appt-end'),status:v('appt-status'),clientId:v('appt-client'),treatmentId:v('appt-treatment'),employeeId:v('appt-employee'),notes:v('appt-notes')};
+    if (!data.date||!data.clientId) { toast('Fecha y cliente requeridos','error'); return; }
+    try {
+      if (id) await updateOne('appointments',id,data); else await addOne('appointments',data);
+      closeModal('appt-modal'); toast('Turno guardado'); await loadAppointments(); renderDashboard();
+    } catch(e) { toast(e.message,'error'); console.error(e); }
+  };
+
+  // ── SALES ─────────────────────────────────────────────────────────
+  async function loadSales() { cache.sales = await getAll('sales'); renderSales(); }
+  function renderSales() {
+    if (!cache.sales.length) { emptyRow('sales-body',7); return; }
+    const sorted = [...cache.sales].sort((a,b)=>{
+      const da=a.createdAt?.toDate?.()??new Date(0), db_=b.createdAt?.toDate?.()??new Date(0); return db_-da;
+    });
+    g('sales-body').innerHTML = sorted.map(s => {
+      const cl=cache.clients.find(c=>c.id===s.clientId), em=cache.employees.find(e=>e.id===s.employeeId);
+      const items = (s.items||[]).map(i=>`${i.name} x${i.quantity}`).join(', ');
+      return `<tr><td>${fmtDate(s.createdAt)}</td><td>${cl?esc(cl.name):'—'}</td>
+      <td style="font-size:12px;color:var(--text2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${items}</td>
+      <td style="font-weight:600;color:var(--accent)">${fmt$(s.total)}</td><td>${s.paymentMethod||'-'}</td><td>${em?esc(em.name):'—'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="window._del('sales','${s.id}')">🗑</button></td></tr>`;
+    }).join('');
   }
-  function addSaleItem(){
-    var type=g('sale-item-type').value; var refId=v('sale-item-ref'); var qty=parseInt(v('sale-item-qty'))||1;
-    var list=type==='product'?cache.products:cache.treatments; var item=list.find(function(x){return x.id===refId;});
-    if(!item){ toast('Seleccioná un item','error'); return; }
-    saleItems.push({itemId:item.id,type:type,name:item.name,quantity:qty,price:item.price}); renderSaleItems();
+  window.openSaleModal = () => { saleItems=[]; renderSaleItems(); updateSaleItemRef(); openModal('sale-modal'); };
+  window.updateSaleItemRef = () => {
+    const type = g('sale-item-type').value, list = type==='product'?cache.products:cache.treatments;
+    g('sale-item-ref').innerHTML = '<option value="">Seleccionar...</option>'+list.map(x=>`<option value="${x.id}">${esc(x.name)} — ${fmt$(x.price)}</option>`).join('');
+  };
+  window.addSaleItem = () => {
+    const type=g('sale-item-type').value, refId=v('sale-item-ref'), qty=parseInt(v('sale-item-qty'))||1;
+    const list=type==='product'?cache.products:cache.treatments, item=list.find(x=>x.id===refId);
+    if (!item) { toast('Seleccioná un item','error'); return; }
+    saleItems.push({itemId:item.id,type,name:item.name,quantity:qty,price:item.price}); renderSaleItems();
+  };
+  window.removeSaleItem = idx => { saleItems.splice(idx,1); renderSaleItems(); };
+  function renderSaleItems() {
+    const total = saleItems.reduce((s,i)=>s+i.price*i.quantity,0);
+    g('sale-total').textContent = total.toLocaleString('es-AR',{minimumFractionDigits:2});
+    g('sale-items-list').innerHTML = saleItems.length
+      ? saleItems.map((it,idx)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:var(--surface);border-radius:6px;margin-bottom:4px;font-size:12px"><span>${esc(it.name)} x${it.quantity}</span><span>${fmt$(it.price*it.quantity)} <button onclick="window.removeSaleItem(${idx})" style="background:none;border:none;color:var(--danger);cursor:pointer;margin-left:8px">✕</button></span></div>`).join('')
+      : '<div style="color:var(--text3);font-size:12px">Sin items</div>';
   }
-  function removeSaleItem(idx){ saleItems.splice(idx,1); renderSaleItems(); }
-  function renderSaleItems(){
-    var total=saleItems.reduce(function(s,i){return s+i.price*i.quantity;},0);
-    g('sale-total').textContent=total.toLocaleString('es-AR',{minimumFractionDigits:2});
-    g('sale-items-list').innerHTML=saleItems.length?saleItems.map(function(it,idx){
-      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:var(--surface);border-radius:6px;margin-bottom:4px;font-size:12px">'
-        +'<span>'+esc(it.name)+' x'+it.quantity+'</span><span>'+fmt$(it.price*it.quantity)
-        +' <button onclick="removeSaleItem('+idx+')" style="background:none;border:none;color:var(--danger);cursor:pointer;margin-left:8px">✕</button></span></div>';
-    }).join(''):'<div style="color:var(--text3);font-size:12px">Sin items</div>';
-  }
-  function saveSale(){
-    if(needsDb()) return;
-    if(!saleItems.length){ toast('Agregá al menos un item','error'); return; }
-    var clientId=v('sale-client'); var employeeId=v('sale-employee');
-    if(!clientId||!employeeId){ toast('Cliente y empleado requeridos','error'); return; }
-    var total=saleItems.reduce(function(s,i){return s+i.price*i.quantity;},0);
-    var data={clientId:clientId,employeeId:employeeId,items:saleItems,total:total,paymentMethod:v('sale-payment'),createdAt:firebase.firestore.FieldValue.serverTimestamp()};
-    db.collection('sales').add(data).then(function(ref){
-      var emp=cache.employees.find(function(e){return e.id===employeeId;}); var proms=[];
-      if(emp&&emp.commissionRate) proms.push(db.collection('commissions').add({employeeId:employeeId,saleId:ref.id,amount:total*emp.commissionRate/100,date:firebase.firestore.FieldValue.serverTimestamp()}));
-      saleItems.filter(function(i){return i.type==='product';}).forEach(function(item){
-        var prod=cache.products.find(function(p){return p.id===item.itemId;});
-        if(prod) proms.push(db.collection('products').doc(prod.id).update({stock:Math.max(0,prod.stock-item.quantity)}));
+  window.saveSale = async () => {
+    if (needsDb()) return;
+    if (!saleItems.length) { toast('Agregá al menos un item','error'); return; }
+    const clientId=v('sale-client'), employeeId=v('sale-employee');
+    if (!clientId||!employeeId) { toast('Cliente y empleado requeridos','error'); return; }
+    const total = saleItems.reduce((s,i)=>s+i.price*i.quantity,0);
+    try {
+      const ref = await addOne('sales',{clientId,employeeId,items:saleItems,total,paymentMethod:v('sale-payment'),createdAt:serverTimestamp()});
+      const emp = cache.employees.find(e=>e.id===employeeId);
+      const proms = [];
+      if (emp?.commissionRate) proms.push(addOne('commissions',{employeeId,saleId:ref.id,amount:total*emp.commissionRate/100,date:serverTimestamp()}));
+      saleItems.filter(i=>i.type==='product').forEach(item => {
+        const prod = cache.products.find(p=>p.id===item.itemId);
+        if (prod) proms.push(updateOne('products',prod.id,{stock:Math.max(0,prod.stock-item.quantity)}));
       });
-      return Promise.all(proms);
-    }).then(function(){ closeModal('sale-modal'); toast('Venta registrada ✓'); saleItems=[]; renderSaleItems(); Promise.all([loadSales(),loadProducts(),loadCommissions()]).then(renderDashboard); })
-    .catch(function(e){ toast(e.message,'error'); });
-  }
+      await Promise.all(proms);
+      closeModal('sale-modal'); toast('Venta registrada ✓');
+      saleItems=[]; renderSaleItems();
+      await Promise.all([loadSales(),loadProducts(),loadCommissions()]); renderDashboard();
+    } catch(e) { toast(e.message,'error'); console.error(e); }
+  };
 
-  // EXPENSES
-  function loadExpenses(){ return db.collection('expenses').get().then(function(s){ cache.expenses=s.docs.map(function(d){ return Object.assign({id:d.id},d.data()); }); renderExpenses(); }); }
-  function renderExpenses(){
-    if(!cache.expenses.length){ emptyRow('exps-body',5); return; }
-    var sorted=[].concat(cache.expenses).sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
-    g('exps-body').innerHTML=sorted.map(function(e){
-      return '<tr><td>'+(e.date||'-')+'</td><td>'+esc(e.description)+'</td><td>'+(e.category||'-')+'</td>'
-        +'<td style="color:var(--danger)">'+fmt$(e.amount)+'</td>'
-        +'<td><button class="btn btn-ghost btn-sm" onclick="editExpense(\''+e.id+'\')">✏</button> <button class="btn btn-danger btn-sm" onclick="delDoc(\'expenses\',\''+e.id+'\',loadExpenses)">🗑</button></td></tr>';
+  // ── EXPENSES ──────────────────────────────────────────────────────
+  async function loadExpenses() { cache.expenses = await getAll('expenses'); renderExpenses(); }
+  function renderExpenses() {
+    if (!cache.expenses.length) { emptyRow('exps-body',5); return; }
+    g('exps-body').innerHTML = [...cache.expenses].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(e =>
+      `<tr><td>${e.date||'-'}</td><td>${esc(e.description)}</td><td>${e.category||'-'}</td>
+      <td style="color:var(--danger)">${fmt$(e.amount)}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="window._editExp('${e.id}')">✏</button> <button class="btn btn-danger btn-sm" onclick="window._del('expenses','${e.id}')">🗑</button></td></tr>`
+    ).join('');
+  }
+  window.openExpModal = () => { rst(['exp-id','exp-desc','exp-amount','exp-date','exp-category']); set('exp-modal-title','Nuevo Gasto'); openModal('exp-modal'); };
+  window._editExp = id => {
+    const e=cache.expenses.find(x=>x.id===id); if(!e) return;
+    set('exp-modal-title','Editar Gasto'); set('exp-id',e.id); set('exp-desc',e.description);
+    set('exp-amount',e.amount); set('exp-date',e.date); set('exp-category',e.category);
+    openModal('exp-modal');
+  };
+  window.saveExpense = async () => {
+    if (needsDb()) return;
+    const id=v('exp-id');
+    const data={description:v('exp-desc'),amount:parseFloat(v('exp-amount'))||0,date:v('exp-date'),category:v('exp-category')};
+    if (!data.description||!data.date) { toast('Descripción y fecha requeridas','error'); return; }
+    try {
+      if (id) await updateOne('expenses',id,data); else await addOne('expenses',data);
+      closeModal('exp-modal'); toast('Gasto guardado'); await loadExpenses();
+    } catch(e) { toast(e.message,'error'); console.error(e); }
+  };
+
+  // ── COMMISSIONS ───────────────────────────────────────────────────
+  async function loadCommissions() { cache.commissions = await getAll('commissions'); renderCommissions(); }
+  function renderCommissions() {
+    if (!cache.commissions.length) { emptyRow('comms-body',4); return; }
+    g('comms-body').innerHTML = [...cache.commissions].sort((a,b)=>{
+      const da=a.date?.toDate?.()??new Date(0), db_=b.date?.toDate?.()??new Date(0); return db_-da;
+    }).map(c => {
+      const em=cache.employees.find(e=>e.id===c.employeeId);
+      return `<tr><td>${fmtDate(c.date)}</td><td>${em?esc(em.name):'—'}</td><td style="font-size:11px;color:var(--text3)">${c.saleId||'—'}</td><td style="color:var(--success);font-weight:600">${fmt$(c.amount)}</td></tr>`;
     }).join('');
   }
-  function openExpModal(){ rst(['exp-id','exp-desc','exp-amount','exp-date','exp-category']); set('exp-modal-title','Nuevo Gasto'); openModal('exp-modal'); }
-  function editExpense(id){ var e=cache.expenses.find(function(x){return x.id===id;}); if(!e) return; set('exp-modal-title','Editar Gasto'); set('exp-id',e.id); set('exp-desc',e.description); set('exp-amount',e.amount); set('exp-date',e.date); set('exp-category',e.category||''); openModal('exp-modal'); }
-  function saveExpense(){
-    if(needsDb()) return;
-    var id=v('exp-id');
-    var data={description:v('exp-desc'),amount:parseFloat(v('exp-amount'))||0,date:v('exp-date'),category:v('exp-category')};
-    if(!data.description||!data.date){ toast('Descripción y fecha requeridas','error'); return; }
-    var p=id?db.collection('expenses').doc(id).update(data):db.collection('expenses').add(data);
-    p.then(function(){ closeModal('exp-modal'); toast('Gasto guardado'); loadExpenses(); }).catch(function(e){ toast(e.message,'error'); });
+
+  // ── DELETE ────────────────────────────────────────────────────────
+  window._del = async (col, id) => {
+    if (!confirm('¿Eliminar este registro?')) return;
+    if (needsDb()) return;
+    const reloaders = {clients:loadClients,employees:loadEmployees,treatments:loadTreatments,products:loadProducts,appointments:loadAppointments,sales:loadSales,expenses:loadExpenses,commissions:loadCommissions};
+    try { await deleteOne(col,id); toast('Eliminado'); await reloaders[col]?.(); renderDashboard(); }
+    catch(e) { toast(e.message,'error'); console.error(e); }
+  };
+
+  // ── POPULATE SELECTS ──────────────────────────────────────────────
+  function populateSelects() {
+    const cOpts = '<option value="">Seleccionar...</option>'+cache.clients.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+    const eOpts = '<option value="">Seleccionar...</option>'+cache.employees.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('');
+    const tOpts = '<option value="">Seleccionar...</option>'+cache.treatments.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');
+    ['appt-client','sale-client'].forEach(id=>{ const el=g(id); if(el) el.innerHTML=cOpts; });
+    ['appt-employee','sale-employee'].forEach(id=>{ const el=g(id); if(el) el.innerHTML=eOpts; });
+    const at=g('appt-treatment'); if(at) at.innerHTML=tOpts;
   }
 
-  // COMMISSIONS
-  function loadCommissions(){ return db.collection('commissions').get().then(function(s){ cache.commissions=s.docs.map(function(d){ return Object.assign({id:d.id},d.data()); }); renderCommissions(); }); }
-  function renderCommissions(){
-    if(!cache.commissions.length){ emptyRow('comms-body',4); return; }
-    var sorted=[].concat(cache.commissions).sort(function(a,b){ var da=a.date&&a.date.toDate?a.date.toDate():new Date(0); var db_=b.date&&b.date.toDate?b.date.toDate():new Date(0); return db_-da; });
-    g('comms-body').innerHTML=sorted.map(function(c){ var em=cache.employees.find(function(e){return e.id===c.employeeId;});
-      return '<tr><td>'+fmtDate(c.date)+'</td><td>'+(em?esc(em.name):'—')+'</td><td style="font-size:11px;color:var(--text3)">'+(c.saleId||'—')+'</td><td style="color:var(--success);font-weight:600">'+fmt$(c.amount)+'</td></tr>';
-    }).join('');
-  }
-
-  // DELETE
-  function delDoc(col,id,reload){
-    if(!confirm('¿Eliminar este registro?')) return;
-    if(needsDb()) return;
-    db.collection(col).doc(id).delete().then(function(){ toast('Eliminado'); reload().then(renderDashboard); }).catch(function(e){ toast(e.message,'error'); });
-  }
-
-  // SELECTS
-  function populateSelects(){
-    var cOpts='<option value="">Seleccionar...</option>'+cache.clients.map(function(c){return '<option value="'+c.id+'">'+esc(c.name)+'</option>';}).join('');
-    var eOpts='<option value="">Seleccionar...</option>'+cache.employees.map(function(e){return '<option value="'+e.id+'">'+esc(e.name)+'</option>';}).join('');
-    var tOpts='<option value="">Seleccionar...</option>'+cache.treatments.map(function(t){return '<option value="'+t.id+'">'+esc(t.name)+'</option>';}).join('');
-    ['appt-client','sale-client'].forEach(function(id){ var el=g(id); if(el) el.innerHTML=cOpts; });
-    ['appt-employee','sale-employee'].forEach(function(id){ var el=g(id); if(el) el.innerHTML=eOpts; });
-    var at=g('appt-treatment'); if(at) at.innerHTML=tOpts;
-  }
-
-  // DASHBOARD
-  function renderDashboard(){
-    var td=todayStr(), tm=td.slice(0,7);
-    var st=cache.sales.filter(function(s){ var d=s.createdAt&&s.createdAt.toDate?s.createdAt.toDate():null; return d&&d.toISOString().startsWith(td); }).reduce(function(s,x){return s+(x.total||0);},0);
-    var sm=cache.sales.filter(function(s){ var d=s.createdAt&&s.createdAt.toDate?s.createdAt.toDate():null; return d&&d.toISOString().startsWith(tm); }).reduce(function(s,x){return s+(x.total||0);},0);
+  // ── DASHBOARD ─────────────────────────────────────────────────────
+  function renderDashboard() {
+    const td=todayStr(), tm=td.slice(0,7);
+    const st=cache.sales.filter(s=>{const d=s.createdAt?.toDate?.();return d&&d.toISOString().startsWith(td);}).reduce((s,x)=>s+(x.total||0),0);
+    const sm=cache.sales.filter(s=>{const d=s.createdAt?.toDate?.();return d&&d.toISOString().startsWith(tm);}).reduce((s,x)=>s+(x.total||0),0);
     g('stat-today').textContent=fmt$(st); g('stat-month').textContent=fmt$(sm);
-    g('stat-appts').textContent=cache.appointments.filter(function(a){return a.date===td&&a.status==='scheduled';}).length;
+    g('stat-appts').textContent=cache.appointments.filter(a=>a.date===td&&a.status==='scheduled').length;
     g('stat-clients').textContent=cache.clients.length;
-    var upcoming=cache.appointments.filter(function(a){return a.date>=td&&a.status==='scheduled';}).sort(function(a,b){return (a.date+a.startTime).localeCompare(b.date+b.startTime);}).slice(0,5);
-    g('dash-appts').innerHTML=upcoming.length?upcoming.map(function(a){ var cl=cache.clients.find(function(c){return c.id===a.clientId;}); var tr=cache.treatments.find(function(t){return t.id===a.treatmentId;});
-      return '<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><div><div style="font-weight:500">'+(cl?esc(cl.name):'—')+'</div><div style="font-size:12px;color:var(--text2)">'+(tr?esc(tr.name):'—')+'</div></div><div style="text-align:right"><div>'+a.date+'</div><div style="color:var(--accent)">'+(a.startTime||'')+'</div></div></div>';
+    const upcoming=cache.appointments.filter(a=>a.date>=td&&a.status==='scheduled').sort((a,b)=>(a.date+a.startTime).localeCompare(b.date+b.startTime)).slice(0,5);
+    g('dash-appts').innerHTML=upcoming.length?upcoming.map(a=>{
+      const cl=cache.clients.find(c=>c.id===a.clientId), tr=cache.treatments.find(t=>t.id===a.treatmentId);
+      return `<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><div><div style="font-weight:500">${cl?esc(cl.name):'—'}</div><div style="font-size:12px;color:var(--text2)">${tr?esc(tr.name):'—'}</div></div><div style="text-align:right"><div>${a.date}</div><div style="color:var(--accent)">${a.startTime||''}</div></div></div>`;
     }).join(''):'<div class="empty">Sin turnos próximos</div>';
-    var ls=cache.products.filter(function(p){return p.stock<=5;}).sort(function(a,b){return a.stock-b.stock;}).slice(0,6);
-    g('dash-stock').innerHTML=ls.length?ls.map(function(p){ return '<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-weight:500">'+esc(p.name)+'</span><span style="color:'+(p.stock<=2?'var(--danger)':'var(--accent)')+'">Stock: '+p.stock+'</span></div>'; }).join(''):'<div class="empty">✓ Stock normal</div>';
-    var rs=[].concat(cache.sales).sort(function(a,b){ var da=a.createdAt&&a.createdAt.toDate?a.createdAt.toDate():new Date(0); var db_=b.createdAt&&b.createdAt.toDate?b.createdAt.toDate():new Date(0); return db_-da; }).slice(0,5);
-    g('dash-sales').innerHTML=rs.length?'<table><thead><tr><th>Fecha</th><th>Cliente</th><th>Total</th><th>Pago</th></tr></thead><tbody>'+rs.map(function(s){ var cl=cache.clients.find(function(c){return c.id===s.clientId;}); return '<tr><td>'+fmtDate(s.createdAt)+'</td><td>'+(cl?esc(cl.name):'—')+'</td><td style="color:var(--accent);font-weight:600">'+fmt$(s.total)+'</td><td>'+(s.paymentMethod||'-')+'</td></tr>'; }).join('')+'</tbody></table>':'<div class="empty">Sin ventas registradas</div>';
+    const ls=cache.products.filter(p=>p.stock<=5).sort((a,b)=>a.stock-b.stock).slice(0,6);
+    g('dash-stock').innerHTML=ls.length?ls.map(p=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-weight:500">${esc(p.name)}</span><span style="color:${p.stock<=2?'var(--danger)':'var(--accent)'}">Stock: ${p.stock}</span></div>`).join(''):'<div class="empty">✓ Stock normal</div>';
+    const rs=[...cache.sales].sort((a,b)=>{const da=a.createdAt?.toDate?.()??new Date(0),db_=b.createdAt?.toDate?.()??new Date(0);return db_-da;}).slice(0,5);
+    g('dash-sales').innerHTML=rs.length?`<table><thead><tr><th>Fecha</th><th>Cliente</th><th>Total</th><th>Pago</th></tr></thead><tbody>${rs.map(s=>{const cl=cache.clients.find(c=>c.id===s.clientId);return `<tr><td>${fmtDate(s.createdAt)}</td><td>${cl?esc(cl.name):'—'}</td><td style="color:var(--accent);font-weight:600">${fmt$(s.total)}</td><td>${s.paymentMethod||'-'}</td></tr>`;}).join('')}</tbody></table>`:'<div class="empty">Sin ventas registradas</div>';
   }
 
-  // XSS ESCAPE
-  function esc(s){ var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
-
-  // INIT
-  var savedCfg = loadConfig();
-  if (savedCfg && savedCfg.apiKey) {
+  // ── INIT ──────────────────────────────────────────────────────────
+  const savedCfg = loadConfig();
+  if (savedCfg?.apiKey) {
+    g('loading-msg').textContent = 'Conectando a Firebase...';
     initFirebase(savedCfg);
   } else {
-    showConfigModal();
-    ['dash-appts','dash-stock','dash-sales'].forEach(function(id){ g(id).innerHTML='<div class="empty">Configurá Firebase para ver datos</div>'; });
+    hideLoading();
+    window.showConfigModal();
+    ['dash-appts','dash-stock','dash-sales'].forEach(id => g(id).innerHTML='<div class="empty">Configurá Firebase para ver datos</div>');
   }
 </script>
 </body>
