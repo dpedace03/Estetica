@@ -88,7 +88,23 @@
     .overlay-mobile.show{display:block}
     #loading-screen{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:16px}
     #loading-screen h2{font-family:'Playfair Display',serif;color:var(--accent);font-size:22px}
-    #loading-screen p{color:var(--text3);font-size:13px}  </style>
+    #loading-screen p{color:var(--text3);font-size:13px}    /* LOGIN */
+    #login-screen{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:998}
+    #login-screen.show{display:flex}
+    .login-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:48px 40px;text-align:center;max-width:360px;width:90%;box-shadow:0 8px 40px rgba(212,120,138,.12)}
+    .login-box h1{font-family:'Playfair Display',serif;font-size:26px;color:var(--accent);margin-bottom:6px}
+    .login-box p{color:var(--text2);font-size:13px;margin-bottom:32px;line-height:1.6}
+    .btn-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px 20px;background:#fff;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--text);cursor:pointer;transition:all .2s}
+    .btn-google:hover{border-color:var(--accent);box-shadow:0 2px 12px rgba(212,120,138,.2)}
+    .btn-google svg{width:20px;height:20px;flex-shrink:0}
+    .user-chip{display:flex;align-items:center;gap:8px;padding:12px 16px;margin:8px 12px;background:rgba(212,120,138,.08);border-radius:10px}
+    .user-chip img{width:28px;height:28px;border-radius:50%;object-fit:cover}
+    .user-chip-info{flex:1;min-width:0}
+    .user-chip-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .user-chip-email{font-size:10px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .btn-logout{background:none;border:none;cursor:pointer;color:var(--text3);font-size:18px;padding:2px 4px;transition:color .15s;flex-shrink:0}
+    .btn-logout:hover{color:var(--danger)}
+  </style>
 </head>
 <body>
 
@@ -97,6 +113,18 @@
   <div class="spinner" style="width:40px;height:40px"></div>
   <h2>Aesthetix Pro</h2>
   <p id="loading-msg">Iniciando...</p>
+</div>
+
+<!-- PANTALLA DE LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <h1>Aesthetix Pro</h1>
+    <p>Sistema de gestión para tu centro de estética.<br>Iniciá sesión para continuar.</p>
+    <button class="btn-google" onclick="window.doGoogleLogin()">
+      <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continuar con Google
+    </button>
+  </div>
 </div>
 
 <div class="overlay-mobile" id="mobileOverlay" onclick="closeSidebar()"></div>
@@ -118,6 +146,7 @@
     <div class="nav-item" data-page="employees"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Empleados</div>
     <div class="nav-item" data-page="commissions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>Comisiones</div>
   </nav>
+  <div id="user-chip-wrap"></div>
   <div class="sidebar-footer">Aesthetix Pro v1.0</div>
 </div>
 
@@ -315,9 +344,11 @@
   // Usamos el SDK modular de Firebase via CDN (soporta database ID personalizado)
   import { initializeApp, getApps, deleteApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
   import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
   // ── ESTADO ────────────────────────────────────────────────────────
   let db = null;
+  let auth = null;
   let saleItems = [];
   const cache = {clients:[],employees:[],treatments:[],products:[],appointments:[],sales:[],expenses:[],commissions:[]};
   const CFG_KEY = 'aesthetix_cfg_v3';
@@ -381,21 +412,58 @@
   };
 
   function initFirebase(cfg) {
-    // Eliminar apps previas
     getApps().forEach(app => { try{ deleteApp(app); }catch(e){} });
     try {
       const app = initializeApp(cfg);
       const dbId = cfg.firestoreDatabaseId && cfg.firestoreDatabaseId !== '(default)' ? cfg.firestoreDatabaseId : undefined;
       db = dbId ? getFirestore(app, dbId) : getFirestore(app);
+      auth = getAuth(app);
+      onAuthStateChanged(auth, user => {
+        if (user) { showApp(user); loadAll(); }
+        else { showLoginScreen(); }
+      });
       hideLoading();
-      toast('Firebase conectado ✓','success');
-      loadAll();
     } catch(e) {
       hideLoading();
       toast('Error Firebase: '+e.message,'error');
       console.error(e);
     }
   }
+
+  function showLoginScreen() {
+    document.getElementById('login-screen').classList.add('show');
+    document.getElementById('sidebar').style.display = 'none';
+    document.getElementById('main').style.display = 'none';
+  }
+
+  function showApp(user) {
+    document.getElementById('login-screen').classList.remove('show');
+    document.getElementById('sidebar').style.display = '';
+    document.getElementById('main').style.display = '';
+    const chip = document.getElementById('user-chip-wrap');
+    const photo = user.photoURL || 'https://ui-avatars.com/api/?name='+encodeURIComponent(user.displayName||'U')+'&background=d4788a&color=fff';
+    chip.innerHTML = `<div class="user-chip">
+      <img src="${photo}" onerror="this.src='https://ui-avatars.com/api/?name=U&background=d4788a&color=fff'">
+      <div class="user-chip-info">
+        <div class="user-chip-name">${user.displayName||'Usuario'}</div>
+        <div class="user-chip-email">${user.email}</div>
+      </div>
+      <button class="btn-logout" onclick="window.doLogout()" title="Cerrar sesión">↩</button>
+    </div>`;
+  }
+
+  window.doGoogleLogin = async () => {
+    if (!auth) { toast('Configurá Firebase primero','error'); showConfigModal(); return; }
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+    } catch(e) { toast('Error al iniciar sesión: '+e.message,'error'); console.error(e); }
+  };
+
+  window.doLogout = async () => {
+    if (!confirm('¿Cerrar sesión?')) return;
+    await signOut(auth);
+  };
 
   function hideLoading() {
     const ls = g('loading-screen');
@@ -724,8 +792,12 @@
     initFirebase(savedCfg);
   } else {
     hideLoading();
-    window.showConfigModal();
-    ['dash-appts','dash-stock','dash-sales'].forEach(id => g(id).innerHTML='<div class="empty">Configurá Firebase para ver datos</div>');
+    // Sin config: mostrar login con botón que abre config
+    document.getElementById('login-screen').classList.add('show');
+    document.getElementById('sidebar').style.display = 'none';
+    document.getElementById('main').style.display = 'none';
+    // Override login button to show config first
+    window.doGoogleLogin = () => { showConfigModal(); };
   }
 </script>
 </body>
