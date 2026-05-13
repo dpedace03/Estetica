@@ -1,13 +1,669 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aesthetix Pro — Gestión Integral</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 
+  <!-- Firebase compat SDK — NO requiere módulos ES, funciona directo en el navegador -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root{--bg:#0f0f10;--surface:#18181b;--surface2:#1f1f23;--border:#2a2a30;--accent:#c8a97e;--accent2:#e8c99e;--danger:#e05a5a;--success:#5ab88a;--text:#f0ece4;--text2:#9c9898;--text3:#5c5858}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;display:flex;min-height:100vh}
+    #sidebar{width:220px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;transition:transform .25s}
+    .logo{padding:28px 20px 20px;border-bottom:1px solid var(--border)}
+    .logo h1{font-family:'Playfair Display',serif;font-size:18px;letter-spacing:.02em;color:var(--accent)}
+    .logo span{color:var(--text2);font-size:11px;font-weight:300;display:block;margin-top:2px}
+    #sidebar nav{flex:1;padding:16px 0;overflow-y:auto}
+    .nav-section{padding:6px 16px 4px;font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--text3)}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;cursor:pointer;color:var(--text2);font-size:13.5px;transition:all .15s;border-left:2px solid transparent}
+    .nav-item:hover{color:var(--text);background:rgba(200,169,126,.06)}
+    .nav-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(200,169,126,.08)}
+    .nav-item svg{width:16px;height:16px;flex-shrink:0}
+    .sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3)}
+    #main{margin-left:220px;flex:1;min-height:100vh;display:flex;flex-direction:column}
+    .topbar{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50}
+    .topbar h2{font-family:'Playfair Display',serif;font-size:16px;font-weight:600}
+    .page{display:none;padding:28px}
+    .page.active{display:block}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:6px;border:none;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+    .btn-primary{background:var(--accent);color:#1a1208}
+    .btn-primary:hover{background:var(--accent2)}
+    .btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
+    .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-danger{background:transparent;color:var(--danger);border:1px solid var(--danger)}
+    .btn-danger:hover{background:var(--danger);color:#fff}
+    .btn-sm{padding:5px 10px;font-size:12px}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px}
+    .card-title{font-family:'Playfair Display',serif;font-size:14px;color:var(--accent2);margin-bottom:4px}
+    .card-value{font-size:28px;font-weight:600;line-height:1.1}
+    .card-sub{font-size:12px;color:var(--text3);margin-top:4px}
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    @media(max-width:900px){.grid-4{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:600px){.grid-4,.grid-2{grid-template-columns:1fr}}
+    .table-wrap{overflow-x:auto;margin-top:16px}
+    table{width:100%;border-collapse:collapse}
+    th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);padding:10px 14px;border-bottom:1px solid var(--border)}
+    td{padding:11px 14px;border-bottom:1px solid rgba(42,42,48,.7);font-size:13px;vertical-align:middle}
+    tr:hover td{background:rgba(200,169,126,.03)}
+    .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+    .badge-scheduled{background:rgba(90,184,138,.15);color:var(--success)}
+    .badge-completed{background:rgba(200,169,126,.15);color:var(--accent)}
+    .badge-cancelled{background:rgba(224,90,90,.15);color:var(--danger)}
+    .modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);align-items:center;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:popIn .2s ease}
+    @keyframes popIn{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+    .modal h3{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:20px;color:var(--accent2)}
+    .form-group{margin-bottom:14px}
+    label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:500}
+    input,select,textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:border-color .15s}
+    input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+    textarea{resize:vertical;min-height:70px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+    .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+    .search-wrap{position:relative;flex:1;min-width:180px}
+    .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text3);pointer-events:none}
+    .search-wrap input{padding-left:32px}
+    .section-title{font-family:'Playfair Display',serif;font-size:15px;margin-bottom:12px}
+    .mt-24{margin-top:24px}
+    #toast{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:8px}
+    .toast-msg{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13px;animation:slideIn .2s ease;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+    .toast-msg.success{border-color:var(--success)}
+    .toast-msg.error{border-color:var(--danger)}
+    @keyframes slideIn{from{transform:translateX(60px);opacity:0}to{transform:translateX(0);opacity:1}}
+    .loader{text-align:center;padding:40px;color:var(--text3)}
+    .spinner{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--accent);animation:spin .7s linear infinite;margin:0 auto 10px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .empty{text-align:center;padding:32px 20px;color:var(--text3)}
+    #hamburger{display:none;background:none;border:none;cursor:pointer;color:var(--text);padding:4px}
+    @media(max-width:768px){
+      #sidebar{transform:translateX(-100%)}
+      #sidebar.open{transform:translateX(0)}
+      #main{margin-left:0}
+      #hamburger{display:block}
+      .topbar{padding:0 16px}
+      .page{padding:16px}
+    }
+    .overlay-mobile{display:none;position:fixed;inset:0;z-index:99}
+    .overlay-mobile.show{display:block}
+  </style>
+</head>
+<body>
+
+<div class="overlay-mobile" id="mobileOverlay" onclick="closeSidebar()"></div>
+
+<div id="sidebar">
+  <div class="logo"><h1>Aesthetix Pro</h1><span>Gestión Integral</span></div>
+  <nav>
+    <div class="nav-section">Principal</div>
+    <div class="nav-item active" data-page="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard</div>
+    <div class="nav-item" data-page="appointments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Turnos</div>
+    <div class="nav-section">Comercial</div>
+    <div class="nav-item" data-page="sales"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>Ventas</div>
+    <div class="nav-item" data-page="expenses"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Gastos</div>
+    <div class="nav-section">Catálogo</div>
+    <div class="nav-item" data-page="treatments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>Tratamientos</div>
+    <div class="nav-item" data-page="products"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>Productos</div>
+    <div class="nav-section">Personas</div>
+    <div class="nav-item" data-page="clients"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clientes</div>
+    <div class="nav-item" data-page="employees"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Empleados</div>
+    <div class="nav-item" data-page="commissions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>Comisiones</div>
+  </nav>
+  <div class="sidebar-footer">Aesthetix Pro v1.0</div>
+</div>
+
+<div id="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <button id="hamburger" onclick="toggleSidebar()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <h2 id="pageTitle">Dashboard</h2>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="showConfigModal()">⚙ Firebase</button>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="grid-4">
+      <div class="card"><div class="card-title">Ventas hoy</div><div class="card-value" id="stat-today">$0</div><div class="card-sub">Este día</div></div>
+      <div class="card"><div class="card-title">Ventas mes</div><div class="card-value" id="stat-month">$0</div><div class="card-sub">Acumulado</div></div>
+      <div class="card"><div class="card-title">Turnos hoy</div><div class="card-value" id="stat-appts">0</div><div class="card-sub">Programados</div></div>
+      <div class="card"><div class="card-title">Clientes</div><div class="card-value" id="stat-clients">0</div><div class="card-sub">Registrados</div></div>
+    </div>
+    <div class="grid-2 mt-24">
+      <div class="card"><div class="section-title">Turnos próximos</div><div id="dash-appts"><div class="loader"><div class="spinner"></div>Cargando...</div></div></div>
+      <div class="card"><div class="section-title">Stock bajo</div><div id="dash-stock"><div class="loader"><div class="spinner"></div>Cargando...</div></div></div>
+    </div>
+    <div class="card mt-24"><div class="section-title">Últimas ventas</div><div id="dash-sales"><div class="loader"><div class="spinner"></div>Cargando...</div></div></div>
+  </div>
+
+  <!-- TURNOS -->
+  <div class="page" id="page-appointments">
+    <div class="toolbar">
+      <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="appt-search" placeholder="Buscar..." oninput="filterTable('appts-body','appt-search')"></div>
+      <select id="appt-filter-status" onchange="renderAppointments()"><option value="">Todos</option><option value="scheduled">Programado</option><option value="completed">Completado</option><option value="cancelled">Cancelado</option></select>
+      <button class="btn btn-primary" onclick="openApptModal()">+ Nuevo Turno</button>
+    </div>
+    <div class="card"><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Hora</th><th>Cliente</th><th>Tratamiento</th><th>Empleado</th><th>Estado</th><th></th></tr></thead><tbody id="appts-body"><tr><td colspan="7"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
+  </div>
+
+  <!-- VENTAS -->
+  <div class="page" id="page-sales">
+    <div class="toolbar">
+      <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="sale-search" placeholder="Buscar..." oninput="filterTable('sales-body','sale-search')"></div>
+      <button class="btn btn-primary" onclick="openSaleModal()">+ Nueva Venta</button>
+    </div>
+    <div class="card"><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Cliente</th><th>Items</th><th>Total</th><th>Pago</th><th>Empleado</th><th></th></tr></thead><tbody id="sales-body"><tr><td colspan="7"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
+  </div>
+
+  <!-- GASTOS -->
+  <div class="page" id="page-expenses">
+    <div class="toolbar">
+      <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="exp-search" placeholder="Buscar..." oninput="filterTable('exps-body','exp-search')"></div>
+      <button class="btn btn-primary" onclick="openExpModal()">+ Nuevo Gasto</button>
+    </div>
+    <div class="card"><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Descripción</th><th>Categoría</th><th>Monto</th><th></th></tr></thead><tbody id="exps-body"><tr><td colspan="5"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
+  </div>
+
+  <!-- TRATAMIENTOS -->
+  <div class="page" id="page-treatments">
+    <div class="toolbar">
+      <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="treat-search" placeholder="Buscar..." oninput="filterTable('treats-body','treat-search')"></div>
+      <button class="btn btn-primary" onclick="openTreatModal()">+ Nuevo Tratamiento</button>
+    </div>
+    <div class="card"><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Categoría</th><th>Duración (min)</th><th>Precio</th><th></th></tr></thead><tbody id="treats-body"><tr><td colspan="5"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
+  </div>
+
+  <!-- PRODUCTOS -->
+  <div class="page" id="page-products">
+    <div class="toolbar">
+      <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="prod-search" placeholder="Buscar..." oninput="filterTable('prods-body','prod-search')"></div>
+      <button class="btn btn-primary" onclick="openProdModal()">+ Nuevo Producto</button>
+    </div>
+    <div class="card"><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Categoría</th><th>Stock</th><th>Precio</th><th>Código</th><th></th></tr></thead><tbody id="prods-body"><tr><td colspan="6"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
+  </div>
+
+  <!-- CLIENTES -->
+  <div class="page" id="page-clients">
+    <div class="toolbar">
+      <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="client-search" placeholder="Buscar..." oninput="filterTable('clients-body','client-search')"></div>
+      <button class="btn btn-primary" onclick="openClientModal()">+ Nuevo Cliente</button>
+    </div>
+    <div class="card"><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Notas</th><th></th></tr></thead><tbody id="clients-body"><tr><td colspan="5"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
+  </div>
+
+  <!-- EMPLEADOS -->
+  <div class="page" id="page-employees">
+    <div class="toolbar">
+      <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="emp-search" placeholder="Buscar..." oninput="filterTable('emps-body','emp-search')"></div>
+      <button class="btn btn-primary" onclick="openEmpModal()">+ Nuevo Empleado</button>
+    </div>
+    <div class="card"><div class="table-wrap"><table><thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Rol</th><th>Comisión %</th><th></th></tr></thead><tbody id="emps-body"><tr><td colspan="6"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
+  </div>
+
+  <!-- COMISIONES -->
+  <div class="page" id="page-commissions">
+    <div class="toolbar"><div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="comm-search" placeholder="Buscar..." oninput="filterTable('comms-body','comm-search')"></div></div>
+    <div class="card"><div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Empleado</th><th>Venta ID</th><th>Monto</th></tr></thead><tbody id="comms-body"><tr><td colspan="4"><div class="loader"><div class="spinner"></div></div></td></tr></tbody></table></div></div>
+  </div>
+</div>
+
+<!-- MODALES -->
+<div class="modal-overlay" id="config-modal">
+  <div class="modal" style="max-width:460px">
+    <h3>⚙ Configurar Firebase</h3>
+    <p style="color:var(--text2);font-size:13px;margin-bottom:20px">Completá con los datos de tu proyecto Firebase. Se guardan en el navegador.</p>
+    <div class="form-group"><label>API Key</label><input id="cfg-apiKey" placeholder="AIzaSy..."></div>
+    <div class="form-group"><label>Auth Domain</label><input id="cfg-authDomain" placeholder="proyecto.firebaseapp.com"></div>
+    <div class="form-group"><label>Project ID</label><input id="cfg-projectId" placeholder="mi-proyecto"></div>
+    <div class="form-group"><label>Storage Bucket</label><input id="cfg-storageBucket" placeholder="proyecto.firebasestorage.app"></div>
+    <div class="form-group"><label>Messaging Sender ID</label><input id="cfg-messagingSenderId" placeholder="123456789"></div>
+    <div class="form-group"><label>App ID</label><input id="cfg-appId" placeholder="1:123:web:abc"></div>
+    <div class="form-group"><label>Firestore Database ID <span style="color:var(--text3);font-weight:300">(dejar vacío = default)</span></label><input id="cfg-dbId" placeholder="(default)"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('config-modal')">Cancelar</button><button class="btn btn-primary" onclick="doSaveConfig()">Conectar</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="appt-modal">
+  <div class="modal">
+    <h3 id="appt-modal-title">Nuevo Turno</h3>
+    <input type="hidden" id="appt-id">
+    <div class="form-row"><div class="form-group"><label>Fecha</label><input type="date" id="appt-date"></div><div class="form-group"><label>Hora inicio</label><input type="time" id="appt-start"></div></div>
+    <div class="form-row"><div class="form-group"><label>Hora fin</label><input type="time" id="appt-end"></div><div class="form-group"><label>Estado</label><select id="appt-status"><option value="scheduled">Programado</option><option value="completed">Completado</option><option value="cancelled">Cancelado</option></select></div></div>
+    <div class="form-group"><label>Cliente</label><select id="appt-client"><option value="">Seleccionar...</option></select></div>
+    <div class="form-group"><label>Tratamiento</label><select id="appt-treatment"><option value="">Seleccionar...</option></select></div>
+    <div class="form-group"><label>Empleado</label><select id="appt-employee"><option value="">Seleccionar...</option></select></div>
+    <div class="form-group"><label>Notas</label><textarea id="appt-notes"></textarea></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('appt-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveAppointment()">Guardar</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="sale-modal">
+  <div class="modal">
+    <h3>Nueva Venta</h3>
+    <div class="form-group"><label>Cliente</label><select id="sale-client"><option value="">Seleccionar...</option></select></div>
+    <div class="form-group"><label>Empleado</label><select id="sale-employee"><option value="">Seleccionar...</option></select></div>
+    <div class="form-group"><label>Método de pago</label><select id="sale-payment"><option value="efectivo">Efectivo</option><option value="tarjeta">Tarjeta</option><option value="transferencia">Transferencia</option><option value="otro">Otro</option></select></div>
+    <div class="form-group">
+      <label>Items</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <select id="sale-item-type" style="flex:0 0 120px" onchange="updateSaleItemRef()"><option value="product">Producto</option><option value="treatment">Tratamiento</option></select>
+        <select id="sale-item-ref" style="flex:1;min-width:140px"><option value="">Seleccionar...</option></select>
+        <input type="number" id="sale-item-qty" value="1" min="1" style="width:60px">
+        <button class="btn btn-ghost btn-sm" onclick="addSaleItem()">+ Agregar</button>
+      </div>
+      <div id="sale-items-list" style="margin-top:10px"></div>
+    </div>
+    <div style="text-align:right;font-size:15px;font-weight:600;color:var(--accent)">Total: $<span id="sale-total">0</span></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('sale-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveSale()">Confirmar Venta</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="exp-modal">
+  <div class="modal">
+    <h3 id="exp-modal-title">Nuevo Gasto</h3>
+    <input type="hidden" id="exp-id">
+    <div class="form-group"><label>Descripción</label><input id="exp-desc"></div>
+    <div class="form-row"><div class="form-group"><label>Monto ($)</label><input type="number" id="exp-amount" min="0"></div><div class="form-group"><label>Fecha</label><input type="date" id="exp-date"></div></div>
+    <div class="form-group"><label>Categoría</label><input id="exp-category" placeholder="Ej: suministros..."></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('exp-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveExpense()">Guardar</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="treat-modal">
+  <div class="modal">
+    <h3 id="treat-modal-title">Nuevo Tratamiento</h3>
+    <input type="hidden" id="treat-id">
+    <div class="form-group"><label>Nombre</label><input id="treat-name"></div>
+    <div class="form-group"><label>Descripción</label><textarea id="treat-desc"></textarea></div>
+    <div class="form-row"><div class="form-group"><label>Duración (min)</label><input type="number" id="treat-duration" min="1"></div><div class="form-group"><label>Precio ($)</label><input type="number" id="treat-price" min="0"></div></div>
+    <div class="form-group"><label>Categoría</label><input id="treat-category" placeholder="Ej: facial, corporal..."></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('treat-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveTreatment()">Guardar</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="prod-modal">
+  <div class="modal">
+    <h3 id="prod-modal-title">Nuevo Producto</h3>
+    <input type="hidden" id="prod-id">
+    <div class="form-group"><label>Nombre</label><input id="prod-name"></div>
+    <div class="form-group"><label>Descripción</label><textarea id="prod-desc"></textarea></div>
+    <div class="form-row"><div class="form-group"><label>Precio ($)</label><input type="number" id="prod-price" min="0"></div><div class="form-group"><label>Stock</label><input type="number" id="prod-stock" min="0"></div></div>
+    <div class="form-row"><div class="form-group"><label>Categoría</label><input id="prod-category"></div><div class="form-group"><label>Código de barra</label><input id="prod-barcode"></div></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('prod-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveProduct()">Guardar</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="client-modal">
+  <div class="modal">
+    <h3 id="client-modal-title">Nuevo Cliente</h3>
+    <input type="hidden" id="client-id">
+    <div class="form-group"><label>Nombre</label><input id="client-name"></div>
+    <div class="form-row"><div class="form-group"><label>Email</label><input type="email" id="client-email"></div><div class="form-group"><label>Teléfono</label><input id="client-phone"></div></div>
+    <div class="form-group"><label>Notas</label><textarea id="client-notes" placeholder="Historial, alergias, preferencias..."></textarea></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('client-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveClient()">Guardar</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="emp-modal">
+  <div class="modal">
+    <h3 id="emp-modal-title">Nuevo Empleado</h3>
+    <input type="hidden" id="emp-id">
+    <div class="form-group"><label>Nombre</label><input id="emp-name"></div>
+    <div class="form-row"><div class="form-group"><label>Email</label><input type="email" id="emp-email"></div><div class="form-group"><label>Teléfono</label><input id="emp-phone"></div></div>
+    <div class="form-row"><div class="form-group"><label>Rol</label><input id="emp-role" placeholder="Ej: esteticista..."></div><div class="form-group"><label>Comisión (%)</label><input type="number" id="emp-commission" min="0" max="100"></div></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('emp-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveEmployee()">Guardar</button></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  var db = null;
+  var cache = {clients:[],employees:[],treatments:[],products:[],appointments:[],sales:[],expenses:[],commissions:[]};
+  var saleItems = [];
+  var CFG_KEY = 'aesthetix_cfg_v2';
+
+  // CONFIG
+  function loadConfig(){ try{ return JSON.parse(localStorage.getItem(CFG_KEY)); }catch(e){ return null; } }
+
+  function doSaveConfig(){
+    var cfg = {
+      apiKey: v('cfg-apiKey'), authDomain: v('cfg-authDomain'), projectId: v('cfg-projectId'),
+      storageBucket: v('cfg-storageBucket'), messagingSenderId: v('cfg-messagingSenderId'),
+      appId: v('cfg-appId'), firestoreDatabaseId: v('cfg-dbId') || '(default)'
+    };
+    if (!cfg.apiKey || !cfg.projectId){ toast('Completá API Key y Project ID','error'); return; }
+    localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
+    closeModal('config-modal');
+    initFirebase(cfg);
+  }
+
+  function showConfigModal(){
+    var cfg = loadConfig() || {};
+    set('cfg-apiKey', cfg.apiKey||''); set('cfg-authDomain', cfg.authDomain||'');
+    set('cfg-projectId', cfg.projectId||''); set('cfg-storageBucket', cfg.storageBucket||'');
+    set('cfg-messagingSenderId', cfg.messagingSenderId||''); set('cfg-appId', cfg.appId||'');
+    set('cfg-dbId', cfg.firestoreDatabaseId||'');
+    openModal('config-modal');
+  }
+
+  function initFirebase(cfg){
+    try{ firebase.apps.forEach(function(a){ a.delete(); }); }catch(e){}
+    try{
+      var app = firebase.initializeApp(cfg);
+      db = firebase.firestore(app);
+      toast('Firebase conectado ✓','success');
+      loadAll();
+    }catch(e){ toast('Error: '+e.message,'error'); }
+  }
+
+  // HELPERS
+  function v(id){ var el=document.getElementById(id); return el ? el.value.trim() : ''; }
+  function set(id, val){ var el=document.getElementById(id); if(el) el.value=val; }
+  function g(id){ return document.getElementById(id); }
+  function fmt$(n){ return '$'+Number(n||0).toLocaleString('es-AR',{minimumFractionDigits:2}); }
+  function fmtDate(ts){ if(!ts) return '-'; var d=ts.toDate?ts.toDate():new Date(ts); return d.toLocaleDateString('es-AR'); }
+  function todayStr(){ return new Date().toISOString().split('T')[0]; }
+  function needsDb(){ if(!db){ toast('Primero configurá Firebase','error'); showConfigModal(); return true; } return false; }
+  function rst(ids){ ids.forEach(function(id){ set(id,''); }); }
+  function statusLabel(s){ return {scheduled:'Programado',completed:'Completado',cancelled:'Cancelado'}[s]||s; }
+  function emptyRow(id,cols,msg){ g(id).innerHTML='<tr><td colspan="'+cols+'"><div class="empty">'+(msg||'Sin registros')+'</div></td></tr>'; }
+
+  // TOAST
+  function toast(msg,type){
+    type=type||'success';
+    var el=document.createElement('div');
+    el.className='toast-msg '+type;
+    el.textContent=(type==='success'?'✓ ':'✕ ')+msg;
+    g('toast').appendChild(el);
+    setTimeout(function(){ el.remove(); },3500);
+  }
+
+  // MODAL
+  function openModal(id){ g(id).classList.add('open'); }
+  function closeModal(id){ g(id).classList.remove('open'); }
+  document.querySelectorAll('.modal-overlay').forEach(function(m){
+    m.addEventListener('click',function(e){ if(e.target===m) m.classList.remove('open'); });
+  });
+
+  // NAV
+  var pageTitles={dashboard:'Dashboard',appointments:'Turnos',sales:'Ventas',expenses:'Gastos',treatments:'Tratamientos',products:'Productos',clients:'Clientes',employees:'Empleados',commissions:'Comisiones'};
+  document.querySelectorAll('.nav-item').forEach(function(item){
+    item.addEventListener('click',function(){
+      var page=item.dataset.page;
+      document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+      document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+      item.classList.add('active');
+      g('page-'+page).classList.add('active');
+      g('pageTitle').textContent=pageTitles[page];
+      closeSidebar();
+    });
+  });
+  function toggleSidebar(){ g('sidebar').classList.toggle('open'); g('mobileOverlay').classList.toggle('show'); }
+  function closeSidebar(){ g('sidebar').classList.remove('open'); g('mobileOverlay').classList.remove('show'); }
+  function filterTable(tbodyId,searchId){
+    var q=g(searchId).value.toLowerCase();
+    document.querySelectorAll('#'+tbodyId+' tr').forEach(function(r){ r.style.display=r.textContent.toLowerCase().includes(q)?'':'none'; });
+  }
+
+  // LOAD ALL
+  function loadAll(){
+    if(!db) return;
+    Promise.all([loadClients(),loadEmployees(),loadTreatments(),loadProducts(),loadAppointments(),loadSales(),loadExpenses(),loadCommissions()])
+      .then(function(){ renderDashboard(); });
+  }
+
+  // CLIENTS
+  function loadClients(){ return db.collection('clients').get().then(function(s){ cache.clients=s.docs.map(function(d){ return Object.assign({id:d.id},d.data()); }); renderClients(); populateSelects(); }); }
+  function renderClients(){
+    if(!cache.clients.length){ emptyRow('clients-body',5); return; }
+    g('clients-body').innerHTML=cache.clients.map(function(c){
+      return '<tr><td>'+esc(c.name)+'</td><td>'+(c.email||'-')+'</td><td>'+(c.phone||'-')+'</td>'
+        +'<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(c.notes||'-')+'</td>'
+        +'<td><button class="btn btn-ghost btn-sm" onclick="editClient(\''+c.id+'\')">✏</button> <button class="btn btn-danger btn-sm" onclick="delDoc(\'clients\',\''+c.id+'\',loadClients)">🗑</button></td></tr>';
+    }).join('');
+    g('stat-clients').textContent=cache.clients.length;
+  }
+  function openClientModal(){ rst(['client-id','client-name','client-email','client-phone','client-notes']); set('client-modal-title','Nuevo Cliente'); openModal('client-modal'); }
+  function editClient(id){ var c=cache.clients.find(function(x){return x.id===id;}); if(!c) return; set('client-modal-title','Editar Cliente'); set('client-id',c.id); set('client-name',c.name); set('client-email',c.email||''); set('client-phone',c.phone||''); set('client-notes',c.notes||''); openModal('client-modal'); }
+  function saveClient(){
+    if(needsDb()) return;
+    var id=v('client-id');
+    var data={name:v('client-name'),email:v('client-email'),phone:v('client-phone'),notes:v('client-notes')};
+    if(!data.name){ toast('El nombre es requerido','error'); return; }
+    var p=id?db.collection('clients').doc(id).update(data):db.collection('clients').add(Object.assign(data,{createdAt:firebase.firestore.FieldValue.serverTimestamp()}));
+    p.then(function(){ closeModal('client-modal'); toast('Cliente guardado'); loadClients(); }).catch(function(e){ toast(e.message,'error'); });
+  }
+
+  // EMPLOYEES
+  function loadEmployees(){ return db.collection('employees').get().then(function(s){ cache.employees=s.docs.map(function(d){ return Object.assign({id:d.id},d.data()); }); renderEmployees(); populateSelects(); }); }
+  function renderEmployees(){
+    if(!cache.employees.length){ emptyRow('emps-body',6); return; }
+    g('emps-body').innerHTML=cache.employees.map(function(e){
+      return '<tr><td>'+esc(e.name)+'</td><td>'+e.email+'</td><td>'+(e.phone||'-')+'</td><td>'+(e.role||'-')+'</td><td>'+(e.commissionRate||0)+'%</td>'
+        +'<td><button class="btn btn-ghost btn-sm" onclick="editEmployee(\''+e.id+'\')">✏</button> <button class="btn btn-danger btn-sm" onclick="delDoc(\'employees\',\''+e.id+'\',loadEmployees)">🗑</button></td></tr>';
+    }).join('');
+  }
+  function openEmpModal(){ rst(['emp-id','emp-name','emp-email','emp-phone','emp-role','emp-commission']); set('emp-modal-title','Nuevo Empleado'); openModal('emp-modal'); }
+  function editEmployee(id){ var e=cache.employees.find(function(x){return x.id===id;}); if(!e) return; set('emp-modal-title','Editar Empleado'); set('emp-id',e.id); set('emp-name',e.name); set('emp-email',e.email); set('emp-phone',e.phone||''); set('emp-role',e.role||''); set('emp-commission',e.commissionRate||''); openModal('emp-modal'); }
+  function saveEmployee(){
+    if(needsDb()) return;
+    var id=v('emp-id');
+    var data={name:v('emp-name'),email:v('emp-email'),phone:v('emp-phone'),role:v('emp-role'),commissionRate:parseFloat(v('emp-commission'))||0};
+    if(!data.name||!data.email){ toast('Nombre y email requeridos','error'); return; }
+    var p=id?db.collection('employees').doc(id).update(data):db.collection('employees').add(data);
+    p.then(function(){ closeModal('emp-modal'); toast('Empleado guardado'); loadEmployees(); }).catch(function(e){ toast(e.message,'error'); });
+  }
+
+  // TREATMENTS
+  function loadTreatments(){ return db.collection('treatments').get().then(function(s){ cache.treatments=s.docs.map(function(d){ return Object.assign({id:d.id},d.data()); }); renderTreatments(); populateSelects(); }); }
+  function renderTreatments(){
+    if(!cache.treatments.length){ emptyRow('treats-body',5); return; }
+    g('treats-body').innerHTML=cache.treatments.map(function(t){
+      return '<tr><td>'+esc(t.name)+'</td><td>'+(t.category||'-')+'</td><td>'+(t.duration||'-')+'</td><td>'+fmt$(t.price)+'</td>'
+        +'<td><button class="btn btn-ghost btn-sm" onclick="editTreatment(\''+t.id+'\')">✏</button> <button class="btn btn-danger btn-sm" onclick="delDoc(\'treatments\',\''+t.id+'\',loadTreatments)">🗑</button></td></tr>';
+    }).join('');
+  }
+  function openTreatModal(){ rst(['treat-id','treat-name','treat-desc','treat-duration','treat-price','treat-category']); set('treat-modal-title','Nuevo Tratamiento'); openModal('treat-modal'); }
+  function editTreatment(id){ var t=cache.treatments.find(function(x){return x.id===id;}); if(!t) return; set('treat-modal-title','Editar Tratamiento'); set('treat-id',t.id); set('treat-name',t.name); set('treat-desc',t.description||''); set('treat-duration',t.duration||''); set('treat-price',t.price||''); set('treat-category',t.category||''); openModal('treat-modal'); }
+  function saveTreatment(){
+    if(needsDb()) return;
+    var id=v('treat-id');
+    var data={name:v('treat-name'),description:v('treat-desc'),duration:parseFloat(v('treat-duration'))||0,price:parseFloat(v('treat-price'))||0,category:v('treat-category')};
+    if(!data.name){ toast('El nombre es requerido','error'); return; }
+    var p=id?db.collection('treatments').doc(id).update(data):db.collection('treatments').add(data);
+    p.then(function(){ closeModal('treat-modal'); toast('Tratamiento guardado'); loadTreatments(); }).catch(function(e){ toast(e.message,'error'); });
+  }
+
+  // PRODUCTS
+  function loadProducts(){ return db.collection('products').get().then(function(s){ cache.products=s.docs.map(function(d){ return Object.assign({id:d.id},d.data()); }); renderProducts(); populateSelects(); }); }
+  function renderProducts(){
+    if(!cache.products.length){ emptyRow('prods-body',6); return; }
+    g('prods-body').innerHTML=cache.products.map(function(p){
+      var low=p.stock<=3;
+      return '<tr><td>'+esc(p.name)+'</td><td>'+(p.category||'-')+'</td>'
+        +'<td style="color:'+(low?'var(--danger)':'inherit')+'">'+p.stock+(low?' ⚠':'')+'</td>'
+        +'<td>'+fmt$(p.price)+'</td><td style="font-size:11px;color:var(--text3)">'+(p.barcode||'-')+'</td>'
+        +'<td><button class="btn btn-ghost btn-sm" onclick="editProduct(\''+p.id+'\')">✏</button> <button class="btn btn-danger btn-sm" onclick="delDoc(\'products\',\''+p.id+'\',loadProducts)">🗑</button></td></tr>';
+    }).join('');
+  }
+  function openProdModal(){ rst(['prod-id','prod-name','prod-desc','prod-price','prod-stock','prod-category','prod-barcode']); set('prod-modal-title','Nuevo Producto'); openModal('prod-modal'); }
+  function editProduct(id){ var p=cache.products.find(function(x){return x.id===id;}); if(!p) return; set('prod-modal-title','Editar Producto'); set('prod-id',p.id); set('prod-name',p.name); set('prod-desc',p.description||''); set('prod-price',p.price||''); set('prod-stock',p.stock||''); set('prod-category',p.category||''); set('prod-barcode',p.barcode||''); openModal('prod-modal'); }
+  function saveProduct(){
+    if(needsDb()) return;
+    var id=v('prod-id');
+    var data={name:v('prod-name'),description:v('prod-desc'),price:parseFloat(v('prod-price'))||0,stock:parseInt(v('prod-stock'))||0,category:v('prod-category'),barcode:v('prod-barcode')};
+    if(!data.name){ toast('El nombre es requerido','error'); return; }
+    var p=id?db.collection('products').doc(id).update(data):db.collection('products').add(data);
+    p.then(function(){ closeModal('prod-modal'); toast('Producto guardado'); loadProducts(); }).catch(function(e){ toast(e.message,'error'); });
+  }
+
+  // APPOINTMENTS
+  function loadAppointments(){ return db.collection('appointments').get().then(function(s){ cache.appointments=s.docs.map(function(d){ return Object.assign({id:d.id},d.data()); }); renderAppointments(); }); }
+  function renderAppointments(){
+    var filter=g('appt-filter-status').value;
+    var list=cache.appointments.filter(function(a){ return !filter||a.status===filter; }).sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
+    if(!list.length){ emptyRow('appts-body',7); return; }
+    g('appts-body').innerHTML=list.map(function(a){
+      var cl=cache.clients.find(function(c){return c.id===a.clientId;}); var tr=cache.treatments.find(function(t){return t.id===a.treatmentId;}); var em=cache.employees.find(function(e){return e.id===a.employeeId;});
+      return '<tr><td>'+(a.date||'-')+'</td><td>'+(a.startTime||'-')+(a.endTime?' - '+a.endTime:'')+'</td>'
+        +'<td>'+(cl?esc(cl.name):'—')+'</td><td>'+(tr?esc(tr.name):'—')+'</td><td>'+(em?esc(em.name):'—')+'</td>'
+        +'<td><span class="badge badge-'+a.status+'">'+statusLabel(a.status)+'</span></td>'
+        +'<td><button class="btn btn-ghost btn-sm" onclick="editAppointment(\''+a.id+'\')">✏</button> <button class="btn btn-danger btn-sm" onclick="delDoc(\'appointments\',\''+a.id+'\',loadAppointments)">🗑</button></td></tr>';
+    }).join('');
+  }
+  function openApptModal(){ rst(['appt-id','appt-date','appt-start','appt-end','appt-notes']); set('appt-status','scheduled'); set('appt-modal-title','Nuevo Turno'); openModal('appt-modal'); }
+  function editAppointment(id){ var a=cache.appointments.find(function(x){return x.id===id;}); if(!a) return; set('appt-modal-title','Editar Turno'); set('appt-id',a.id); set('appt-date',a.date||''); set('appt-start',a.startTime||''); set('appt-end',a.endTime||''); set('appt-status',a.status||'scheduled'); set('appt-client',a.clientId||''); set('appt-treatment',a.treatmentId||''); set('appt-employee',a.employeeId||''); set('appt-notes',a.notes||''); openModal('appt-modal'); }
+  function saveAppointment(){
+    if(needsDb()) return;
+    var id=v('appt-id');
+    var data={date:v('appt-date'),startTime:v('appt-start'),endTime:v('appt-end'),status:v('appt-status'),clientId:v('appt-client'),treatmentId:v('appt-treatment'),employeeId:v('appt-employee'),notes:v('appt-notes')};
+    if(!data.date||!data.clientId){ toast('Fecha y cliente requeridos','error'); return; }
+    var p=id?db.collection('appointments').doc(id).update(data):db.collection('appointments').add(data);
+    p.then(function(){ closeModal('appt-modal'); toast('Turno guardado'); loadAppointments().then(renderDashboard); }).catch(function(e){ toast(e.message,'error'); });
+  }
+
+  // SALES
+  function loadSales(){ return db.collection('sales').get().then(function(s){ cache.sales=s.docs.map(function(d){ return Object.assign({id:d.id},d.data()); }); renderSales(); }); }
+  function renderSales(){
+    if(!cache.sales.length){ emptyRow('sales-body',7); return; }
+    var sorted=[].concat(cache.sales).sort(function(a,b){ var da=a.createdAt&&a.createdAt.toDate?a.createdAt.toDate():new Date(0); var db_=b.createdAt&&b.createdAt.toDate?b.createdAt.toDate():new Date(0); return db_-da; });
+    g('sales-body').innerHTML=sorted.map(function(s){
+      var cl=cache.clients.find(function(c){return c.id===s.clientId;}); var em=cache.employees.find(function(e){return e.id===s.employeeId;});
+      var items=(s.items||[]).map(function(i){return i.name+' x'+i.quantity;}).join(', ');
+      return '<tr><td>'+fmtDate(s.createdAt)+'</td><td>'+(cl?esc(cl.name):'—')+'</td>'
+        +'<td style="font-size:12px;color:var(--text2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+items+'</td>'
+        +'<td style="font-weight:600;color:var(--accent)">'+fmt$(s.total)+'</td><td>'+(s.paymentMethod||'-')+'</td><td>'+(em?esc(em.name):'—')+'</td>'
+        +'<td><button class="btn btn-danger btn-sm" onclick="delDoc(\'sales\',\''+s.id+'\',loadSales)">🗑</button></td></tr>';
+    }).join('');
+  }
+  function openSaleModal(){ saleItems=[]; renderSaleItems(); openModal('sale-modal'); updateSaleItemRef(); }
+  function updateSaleItemRef(){
+    var type=g('sale-item-type').value; var list=type==='product'?cache.products:cache.treatments;
+    g('sale-item-ref').innerHTML='<option value="">Seleccionar...</option>'+list.map(function(x){return '<option value="'+x.id+'">'+esc(x.name)+' — '+fmt$(x.price)+'</option>';}).join('');
+  }
+  function addSaleItem(){
+    var type=g('sale-item-type').value; var refId=v('sale-item-ref'); var qty=parseInt(v('sale-item-qty'))||1;
+    var list=type==='product'?cache.products:cache.treatments; var item=list.find(function(x){return x.id===refId;});
+    if(!item){ toast('Seleccioná un item','error'); return; }
+    saleItems.push({itemId:item.id,type:type,name:item.name,quantity:qty,price:item.price}); renderSaleItems();
+  }
+  function removeSaleItem(idx){ saleItems.splice(idx,1); renderSaleItems(); }
+  function renderSaleItems(){
+    var total=saleItems.reduce(function(s,i){return s+i.price*i.quantity;},0);
+    g('sale-total').textContent=total.toLocaleString('es-AR',{minimumFractionDigits:2});
+    g('sale-items-list').innerHTML=saleItems.length?saleItems.map(function(it,idx){
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:var(--surface);border-radius:6px;margin-bottom:4px;font-size:12px">'
+        +'<span>'+esc(it.name)+' x'+it.quantity+'</span><span>'+fmt$(it.price*it.quantity)
+        +' <button onclick="removeSaleItem('+idx+')" style="background:none;border:none;color:var(--danger);cursor:pointer;margin-left:8px">✕</button></span></div>';
+    }).join(''):'<div style="color:var(--text3);font-size:12px">Sin items</div>';
+  }
+  function saveSale(){
+    if(needsDb()) return;
+    if(!saleItems.length){ toast('Agregá al menos un item','error'); return; }
+    var clientId=v('sale-client'); var employeeId=v('sale-employee');
+    if(!clientId||!employeeId){ toast('Cliente y empleado requeridos','error'); return; }
+    var total=saleItems.reduce(function(s,i){return s+i.price*i.quantity;},0);
+    var data={clientId:clientId,employeeId:employeeId,items:saleItems,total:total,paymentMethod:v('sale-payment'),createdAt:firebase.firestore.FieldValue.serverTimestamp()};
+    db.collection('sales').add(data).then(function(ref){
+      var emp=cache.employees.find(function(e){return e.id===employeeId;}); var proms=[];
+      if(emp&&emp.commissionRate) proms.push(db.collection('commissions').add({employeeId:employeeId,saleId:ref.id,amount:total*emp.commissionRate/100,date:firebase.firestore.FieldValue.serverTimestamp()}));
+      saleItems.filter(function(i){return i.type==='product';}).forEach(function(item){
+        var prod=cache.products.find(function(p){return p.id===item.itemId;});
+        if(prod) proms.push(db.collection('products').doc(prod.id).update({stock:Math.max(0,prod.stock-item.quantity)}));
+      });
+      return Promise.all(proms);
+    }).then(function(){ closeModal('sale-modal'); toast('Venta registrada ✓'); saleItems=[]; renderSaleItems(); Promise.all([loadSales(),loadProducts(),loadCommissions()]).then(renderDashboard); })
+    .catch(function(e){ toast(e.message,'error'); });
+  }
+
+  // EXPENSES
+  function loadExpenses(){ return db.collection('expenses').get().then(function(s){ cache.expenses=s.docs.map(function(d){ return Object.assign({id:d.id},d.data()); }); renderExpenses(); }); }
+  function renderExpenses(){
+    if(!cache.expenses.length){ emptyRow('exps-body',5); return; }
+    var sorted=[].concat(cache.expenses).sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
+    g('exps-body').innerHTML=sorted.map(function(e){
+      return '<tr><td>'+(e.date||'-')+'</td><td>'+esc(e.description)+'</td><td>'+(e.category||'-')+'</td>'
+        +'<td style="color:var(--danger)">'+fmt$(e.amount)+'</td>'
+        +'<td><button class="btn btn-ghost btn-sm" onclick="editExpense(\''+e.id+'\')">✏</button> <button class="btn btn-danger btn-sm" onclick="delDoc(\'expenses\',\''+e.id+'\',loadExpenses)">🗑</button></td></tr>';
+    }).join('');
+  }
+  function openExpModal(){ rst(['exp-id','exp-desc','exp-amount','exp-date','exp-category']); set('exp-modal-title','Nuevo Gasto'); openModal('exp-modal'); }
+  function editExpense(id){ var e=cache.expenses.find(function(x){return x.id===id;}); if(!e) return; set('exp-modal-title','Editar Gasto'); set('exp-id',e.id); set('exp-desc',e.description); set('exp-amount',e.amount); set('exp-date',e.date); set('exp-category',e.category||''); openModal('exp-modal'); }
+  function saveExpense(){
+    if(needsDb()) return;
+    var id=v('exp-id');
+    var data={description:v('exp-desc'),amount:parseFloat(v('exp-amount'))||0,date:v('exp-date'),category:v('exp-category')};
+    if(!data.description||!data.date){ toast('Descripción y fecha requeridas','error'); return; }
+    var p=id?db.collection('expenses').doc(id).update(data):db.collection('expenses').add(data);
+    p.then(function(){ closeModal('exp-modal'); toast('Gasto guardado'); loadExpenses(); }).catch(function(e){ toast(e.message,'error'); });
+  }
+
+  // COMMISSIONS
+  function loadCommissions(){ return db.collection('commissions').get().then(function(s){ cache.commissions=s.docs.map(function(d){ return Object.assign({id:d.id},d.data()); }); renderCommissions(); }); }
+  function renderCommissions(){
+    if(!cache.commissions.length){ emptyRow('comms-body',4); return; }
+    var sorted=[].concat(cache.commissions).sort(function(a,b){ var da=a.date&&a.date.toDate?a.date.toDate():new Date(0); var db_=b.date&&b.date.toDate?b.date.toDate():new Date(0); return db_-da; });
+    g('comms-body').innerHTML=sorted.map(function(c){ var em=cache.employees.find(function(e){return e.id===c.employeeId;});
+      return '<tr><td>'+fmtDate(c.date)+'</td><td>'+(em?esc(em.name):'—')+'</td><td style="font-size:11px;color:var(--text3)">'+(c.saleId||'—')+'</td><td style="color:var(--success);font-weight:600">'+fmt$(c.amount)+'</td></tr>';
+    }).join('');
+  }
+
+  // DELETE
+  function delDoc(col,id,reload){
+    if(!confirm('¿Eliminar este registro?')) return;
+    if(needsDb()) return;
+    db.collection(col).doc(id).delete().then(function(){ toast('Eliminado'); reload().then(renderDashboard); }).catch(function(e){ toast(e.message,'error'); });
+  }
+
+  // SELECTS
+  function populateSelects(){
+    var cOpts='<option value="">Seleccionar...</option>'+cache.clients.map(function(c){return '<option value="'+c.id+'">'+esc(c.name)+'</option>';}).join('');
+    var eOpts='<option value="">Seleccionar...</option>'+cache.employees.map(function(e){return '<option value="'+e.id+'">'+esc(e.name)+'</option>';}).join('');
+    var tOpts='<option value="">Seleccionar...</option>'+cache.treatments.map(function(t){return '<option value="'+t.id+'">'+esc(t.name)+'</option>';}).join('');
+    ['appt-client','sale-client'].forEach(function(id){ var el=g(id); if(el) el.innerHTML=cOpts; });
+    ['appt-employee','sale-employee'].forEach(function(id){ var el=g(id); if(el) el.innerHTML=eOpts; });
+    var at=g('appt-treatment'); if(at) at.innerHTML=tOpts;
+  }
+
+  // DASHBOARD
+  function renderDashboard(){
+    var td=todayStr(), tm=td.slice(0,7);
+    var st=cache.sales.filter(function(s){ var d=s.createdAt&&s.createdAt.toDate?s.createdAt.toDate():null; return d&&d.toISOString().startsWith(td); }).reduce(function(s,x){return s+(x.total||0);},0);
+    var sm=cache.sales.filter(function(s){ var d=s.createdAt&&s.createdAt.toDate?s.createdAt.toDate():null; return d&&d.toISOString().startsWith(tm); }).reduce(function(s,x){return s+(x.total||0);},0);
+    g('stat-today').textContent=fmt$(st); g('stat-month').textContent=fmt$(sm);
+    g('stat-appts').textContent=cache.appointments.filter(function(a){return a.date===td&&a.status==='scheduled';}).length;
+    g('stat-clients').textContent=cache.clients.length;
+    var upcoming=cache.appointments.filter(function(a){return a.date>=td&&a.status==='scheduled';}).sort(function(a,b){return (a.date+a.startTime).localeCompare(b.date+b.startTime);}).slice(0,5);
+    g('dash-appts').innerHTML=upcoming.length?upcoming.map(function(a){ var cl=cache.clients.find(function(c){return c.id===a.clientId;}); var tr=cache.treatments.find(function(t){return t.id===a.treatmentId;});
+      return '<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)"><div><div style="font-weight:500">'+(cl?esc(cl.name):'—')+'</div><div style="font-size:12px;color:var(--text2)">'+(tr?esc(tr.name):'—')+'</div></div><div style="text-align:right"><div>'+a.date+'</div><div style="color:var(--accent)">'+(a.startTime||'')+'</div></div></div>';
+    }).join(''):'<div class="empty">Sin turnos próximos</div>';
+    var ls=cache.products.filter(function(p){return p.stock<=5;}).sort(function(a,b){return a.stock-b.stock;}).slice(0,6);
+    g('dash-stock').innerHTML=ls.length?ls.map(function(p){ return '<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)"><span style="font-weight:500">'+esc(p.name)+'</span><span style="color:'+(p.stock<=2?'var(--danger)':'var(--accent)')+'">Stock: '+p.stock+'</span></div>'; }).join(''):'<div class="empty">✓ Stock normal</div>';
+    var rs=[].concat(cache.sales).sort(function(a,b){ var da=a.createdAt&&a.createdAt.toDate?a.createdAt.toDate():new Date(0); var db_=b.createdAt&&b.createdAt.toDate?b.createdAt.toDate():new Date(0); return db_-da; }).slice(0,5);
+    g('dash-sales').innerHTML=rs.length?'<table><thead><tr><th>Fecha</th><th>Cliente</th><th>Total</th><th>Pago</th></tr></thead><tbody>'+rs.map(function(s){ var cl=cache.clients.find(function(c){return c.id===s.clientId;}); return '<tr><td>'+fmtDate(s.createdAt)+'</td><td>'+(cl?esc(cl.name):'—')+'</td><td style="color:var(--accent);font-weight:600">'+fmt$(s.total)+'</td><td>'+(s.paymentMethod||'-')+'</td></tr>'; }).join('')+'</tbody></table>':'<div class="empty">Sin ventas registradas</div>';
+  }
+
+  // XSS ESCAPE
+  function esc(s){ var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+
+  // INIT
+  var savedCfg = loadConfig();
+  if (savedCfg && savedCfg.apiKey) {
+    initFirebase(savedCfg);
+  } else {
+    showConfigModal();
+    ['dash-appts','dash-stock','dash-sales'].forEach(function(id){ g(id).innerHTML='<div class="empty">Configurá Firebase para ver datos</div>'; });
+  }
+</script>
+</body>
+</html>
