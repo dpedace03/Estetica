@@ -878,8 +878,20 @@
 
   // INIT
   const savedCfg=loadConfig();
-  if(savedCfg?.apiKey){g('loading-msg').textContent='Conectando...';initFirebase(savedCfg);}
-  else{hideLoading();g('login-screen').classList.add('show');g('sidebar').style.display='none';g('main').style.display='none';window.doGoogleLogin=()=>showConfigModal();}
+  if(savedCfg?.apiKey){
+    g('loading-msg').textContent='Conectando...';
+    initFirebase(savedCfg);
+  } else {
+    hideLoading();
+    g('login-screen').classList.add('show');
+    g('sidebar').style.display='none';
+    g('main').style.display='none';
+    // El botón abre directamente el modal de configuración de Firebase
+    window.doGoogleLogin = function(){
+      toast('Primero configurá Firebase para poder iniciar sesión','error');
+      setTimeout(()=>window.showConfigModal(),300);
+    };
+  }
 </script>
 </body>
 </html>
