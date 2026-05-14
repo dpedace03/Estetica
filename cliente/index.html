@@ -1,1 +1,646 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lorenzza — Portal de Clientes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+<div id="loading-screen">
+  <div class="spinner" style="width:46px;height:46px"></div>
+  <h2>Lorenzza</h2>
+  <p id="loading-msg">Iniciando...</p>
+</div>
+
+<div id="login-screen">
+  <div class="login-box">
+    <h1>Lorenzza</h1>
+    <small>PORTAL DE CLIENTES</small>
+    <p>Reservá turnos, consultá productos y promociones desde acá</p>
+    <button class="btn-google" onclick="window.doGoogleLogin()">
+      <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continuar con Google
+    </button>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <header class="app-header">
+    <div class="brand">
+      <div>
+        <div class="brand-logo">Lorenzza</div>
+        <div class="brand-tagline">PORTAL DE CLIENTES</div>
+      </div>
+    </div>
+    <div id="user-area"></div>
+  </header>
+
+  <main>
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+      <div class="welcome">
+        <h1 id="welcome-name">Bienvenida</h1>
+        <p>¿Qué te gustaría hacer hoy?</p>
+      </div>
+
+      <div class="menu-grid">
+        <button class="btn-3d" onclick="showPage('treatments')">
+          <div class="btn-3d-inner">
+            <div class="btn-3d-icon">✨</div>
+            <div class="btn-3d-title">Tratamientos</div>
+            <div class="btn-3d-sub">Servicios y precios</div>
+          </div>
+        </button>
+
+        <button class="btn-3d sky" onclick="showPage('products')">
+          <div class="btn-3d-inner">
+            <div class="btn-3d-icon">🛍️</div>
+            <div class="btn-3d-title">Productos</div>
+            <div class="btn-3d-sub">Comprá online</div>
+          </div>
+        </button>
+
+        <button class="btn-3d gold" onclick="showPage('promos')">
+          <div class="btn-3d-inner">
+            <div class="btn-3d-icon">🌿</div>
+            <div class="btn-3d-title">Promos</div>
+            <div class="btn-3d-sub">Ofertas vigentes</div>
+          </div>
+        </button>
+
+        <button class="btn-3d coral" onclick="showPage('appointments')">
+          <div class="btn-3d-inner">
+            <div class="btn-3d-icon">📅</div>
+            <div class="btn-3d-title">Turnos</div>
+            <div class="btn-3d-sub">Reservar o cancelar</div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- TRATAMIENTOS -->
+    <div class="page" id="page-treatments">
+      <div class="back-bar">
+        <button class="back-btn" onclick="showPage('home')">← Volver</button>
+        <h2 class="page-title">Tratamientos</h2>
+      </div>
+      <div id="treatments-list" class="items-grid"><div class="loader"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- PRODUCTOS -->
+    <div class="page" id="page-products">
+      <div class="back-bar">
+        <button class="back-btn" onclick="showPage('home')">← Volver</button>
+        <h2 class="page-title">Productos</h2>
+      </div>
+      <div id="products-list" class="items-grid"><div class="loader"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- PROMOS -->
+    <div class="page" id="page-promos">
+      <div class="back-bar">
+        <button class="back-btn" onclick="showPage('home')">← Volver</button>
+        <h2 class="page-title">Promociones</h2>
+      </div>
+      <div id="promos-list" class="items-grid"><div class="loader"><div class="spinner"></div></div></div>
+    </div>
+
+    <!-- TURNOS -->
+    <div class="page" id="page-appointments">
+      <div class="back-bar">
+        <button class="back-btn" onclick="showPage('home')">← Volver</button>
+        <h2 class="page-title">Mis Turnos</h2>
+        <button class="btn btn-primary" onclick="openNewApptModal()" style="margin-left:auto">+ Reservar Turno</button>
+      </div>
+      <div class="my-appts" id="my-appts"><div class="loader"><div class="spinner"></div></div></div>
+    </div>
+  </main>
+
+  <!-- CART -->
+  <div class="cart-summary" id="cart-summary">
+    <div class="cart-info">
+      <span id="cart-count">0</span> productos · Total: <b id="cart-total">$0</b>
+    </div>
+    <button class="btn btn-primary" onclick="openCheckoutModal()">Confirmar Compra</button>
+  </div>
+</div>
+
+<!-- ═══════════ MODALES ═══════════ -->
+
+<!-- Reservar turno -->
+<div class="modal-overlay" id="appt-modal">
+  <div class="modal">
+    <h3>Reservar Turno</h3>
+    <div class="form-group">
+      <label>Tipo de servicio</label>
+      <select id="appt-type" onchange="updateApptServiceOpts()">
+        <option value="treatment">Tratamiento</option>
+        <option value="promo">Promo</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Servicio</label>
+      <select id="appt-service"><option value="">Seleccionar...</option></select>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Fecha</label><input type="date" id="appt-date"></div>
+      <div class="form-group"><label>Hora</label><input type="time" id="appt-time"></div>
+    </div>
+    <div class="form-group"><label>Notas (opcional)</label><textarea id="appt-notes" placeholder="Algo que debamos saber..."></textarea></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('appt-modal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="reserveAppointment()">Confirmar Reserva</button>
+    </div>
+  </div>
+</div>
+
+<!-- Checkout -->
+<div class="modal-overlay" id="checkout-modal">
+  <div class="modal">
+    <h3>Confirmar Compra</h3>
+    <div id="checkout-items" class="cart-list"></div>
+    <div style="text-align:right;font-family:'Playfair Display',serif;font-size:22px;color:var(--accent-darker);font-weight:700;padding:12px 0;border-top:1px solid var(--border)">
+      Total: $<span id="checkout-total">0</span>
+    </div>
+    <div class="form-group">
+      <label>Método de pago</label>
+      <select id="checkout-payment">
+        <option value="efectivo">Efectivo (en local)</option>
+        <option value="tarjeta">Tarjeta (en local)</option>
+        <option value="transferencia">Transferencia</option>
+      </select>
+    </div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:8px;font-style:italic">El pago se realiza al retirar el producto en el local.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('checkout-modal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmPurchase()">Confirmar Pedido</button>
+    </div>
+  </div>
+</div>
+
+<!-- Config Firebase -->
+<div class="modal-overlay" id="config-modal">
+  <div class="modal">
+    <h3>⚙ Configuración</h3>
+    <div class="form-group"><label>API Key</label><input id="cfg-apiKey"></div>
+    <div class="form-group"><label>Auth Domain</label><input id="cfg-authDomain"></div>
+    <div class="form-group"><label>Project ID</label><input id="cfg-projectId"></div>
+    <div class="form-group"><label>Storage Bucket</label><input id="cfg-storageBucket"></div>
+    <div class="form-group"><label>Messaging Sender ID</label><input id="cfg-messagingSenderId"></div>
+    <div class="form-group"><label>App ID</label><input id="cfg-appId"></div>
+    <div class="form-group"><label>Firestore DB ID</label><input id="cfg-dbId"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal('config-modal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="doSaveConfig()">Conectar</button>
+    </div>
+  </div>
+</div>
+
+<button class="config-fab" onclick="showConfigModal()">⚙ Firebase</button>
+
+<div id="toast"></div>
+
+<script type="module">
+  import { initializeApp, getApps, deleteApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+  import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+  let db=null, auth=null, currentUser=null, currentClientId=null;
+  const cache = {treatments:[], products:[], promos:[], appointments:[]};
+  let cart = []; // {itemId, name, price, qty}
+  const CFG_KEY = 'lorenzza_cfg_v1';
+
+  const g = id => document.getElementById(id);
+  const v = id => { const el=g(id); return el?el.value.trim():'' };
+  const set = (id,val) => { const el=g(id); if(el) el.value = val??'' };
+  const esc = s => { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML };
+  const fmt$ = n => '$'+Number(n||0).toLocaleString('es-AR',{minimumFractionDigits:2});
+  const fmtDate = ts => { if(!ts) return '-'; const d=ts.toDate?ts.toDate():new Date(ts); return d.toLocaleDateString('es-AR') };
+  const statusLabel = s => ({scheduled:'Programado',completed:'Cumplido',cancelled:'Cancelado'}[s]||s);
+
+  function toast(msg, type='success'){
+    const el = document.createElement('div');
+    el.className = 'toast-msg '+type;
+    el.textContent = (type==='success'?'✓ ':'✕ ')+msg;
+    g('toast').appendChild(el);
+    setTimeout(()=>el.remove(), 4000);
+  }
+  const openModal = id => g(id).classList.add('open');
+  const closeModal = id => g(id).classList.remove('open');
+  window.closeModal = closeModal;
+
+  // ── CONFIG ──
+  function loadConfig(){ try{return JSON.parse(localStorage.getItem(CFG_KEY))}catch(e){return null} }
+  window.showConfigModal = function(){
+    const cfg = loadConfig()||{};
+    ['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'].forEach(k=>set('cfg-'+k, cfg[k]));
+    set('cfg-dbId', cfg.firestoreDatabaseId);
+    openModal('config-modal');
+  };
+  window.doSaveConfig = function(){
+    const cfg = {
+      apiKey:v('cfg-apiKey'), authDomain:v('cfg-authDomain'), projectId:v('cfg-projectId'),
+      storageBucket:v('cfg-storageBucket'), messagingSenderId:v('cfg-messagingSenderId'),
+      appId:v('cfg-appId'), firestoreDatabaseId:v('cfg-dbId')||'(default)'
+    };
+    if(!cfg.apiKey||!cfg.projectId){ toast('Completá API Key y Project ID','error'); return; }
+    localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
+    closeModal('config-modal');
+    initFirebase(cfg);
+  };
+
+  function initFirebase(cfg){
+    getApps().forEach(app=>{try{deleteApp(app)}catch(e){}});
+    try{
+      const app = initializeApp(cfg);
+      const dbId = cfg.firestoreDatabaseId && cfg.firestoreDatabaseId!=='(default)' ? cfg.firestoreDatabaseId : undefined;
+      db = dbId ? getFirestore(app, dbId) : getFirestore(app);
+      auth = getAuth(app);
+      onAuthStateChanged(auth, user => {
+        if(user){ showApp(user); loadAll(); }
+        else { showLoginScreen(); }
+      });
+      hideLoading();
+    }catch(e){
+      hideLoading();
+      toast('Error Firebase: '+e.message, 'error');
+      console.error(e);
+    }
+  }
+
+  const hideLoading = () => { const ls=g('loading-screen'); if(ls) ls.style.display='none' };
+  const showLoginScreen = () => { g('login-screen').classList.add('show'); g('app').style.display='none' };
+  function showApp(user){
+    currentUser = user;
+    g('login-screen').classList.remove('show');
+    g('app').style.display = '';
+    const photo = user.photoURL || 'https://ui-avatars.com/api/?name='+encodeURIComponent(user.displayName||'U')+'&background=5e9c91&color=fff';
+    const firstName = (user.displayName||'').split(' ')[0] || 'Cliente';
+    g('welcome-name').textContent = '¡Hola, '+firstName+'!';
+    g('user-area').innerHTML = `<div class="user-chip"><img src="${photo}"><span class="user-chip-name">${esc(firstName)}</span><button class="btn-logout" onclick="window.doLogout()" title="Cerrar sesión">↩</button></div>`;
+  }
+
+  window.doGoogleLogin = async () => {
+    if(!auth){ toast('Configurá Firebase primero','error'); showConfigModal(); return; }
+    try{ await signInWithPopup(auth, new GoogleAuthProvider()); }
+    catch(e){ toast('Error: '+e.message,'error'); }
+  };
+  window.doLogout = async () => {
+    if(!confirm('¿Cerrar sesión?')) return;
+    await signOut(auth);
+  };
+
+  // ── NAVEGACIÓN ──
+  window.showPage = function(page){
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    g('page-'+page).classList.add('active');
+    if(page === 'appointments') renderMyAppts();
+    if(page === 'home') renderCart();
+    window.scrollTo({top:0, behavior:'smooth'});
+  };
+
+  // ── CRUD READ ──
+  const getAll = async col => {
+    const s = await getDocs(collection(db, col));
+    return s.docs.map(d => ({id:d.id, ...d.data()}));
+  };
+
+  async function loadAll(){
+    if(!db) return;
+    try{
+      // Cargar/crear cliente vinculado al user
+      await ensureClient();
+      // Cargar catálogos
+      const [treatments, products, promos, appointments] = await Promise.all([
+        getAll('treatments'), getAll('products'), getAll('promos'), getAll('appointments')
+      ]);
+      cache.treatments = treatments;
+      cache.products = products;
+      cache.promos = promos.filter(p => p.active);
+      cache.appointments = appointments.filter(a => a.clientId === currentClientId);
+      renderTreatments();
+      renderProducts();
+      renderPromos();
+      renderMyAppts();
+    }catch(e){
+      toast('Error cargando datos: '+e.message,'error');
+      console.error(e);
+    }
+  }
+
+  // Asegurar que el cliente existe en la colección 'clients'
+  async function ensureClient(){
+    if(!currentUser) return;
+    const snap = await getDocs(collection(db,'clients'));
+    const all = snap.docs.map(d => ({id:d.id, ...d.data()}));
+    const found = all.find(c => c.userId === currentUser.uid || (c.email && c.email.toLowerCase() === (currentUser.email||'').toLowerCase()));
+    if(found){
+      currentClientId = found.id;
+      // Si no tenía userId guardado, agregarlo
+      if(!found.userId){
+        await updateDoc(doc(db,'clients',found.id), {userId: currentUser.uid});
+      }
+    } else {
+      // Crear cliente nuevo
+      const ref = await addDoc(collection(db,'clients'), {
+        name: currentUser.displayName||'Cliente',
+        email: currentUser.email||'',
+        phone: '', notes: '',
+        userId: currentUser.uid,
+        createdAt: serverTimestamp(),
+        fromPortal: true
+      });
+      currentClientId = ref.id;
+    }
+  }
+
+  // ── RENDER TRATAMIENTOS ──
+  function renderTreatments(){
+    if(!cache.treatments.length){
+      g('treatments-list').innerHTML = '<div class="empty">No hay tratamientos disponibles por el momento.</div>';
+      return;
+    }
+    // Agrupar por categoría
+    const groups = {};
+    cache.treatments.forEach(t => {
+      const cat = t.category || 'Otros';
+      (groups[cat] = groups[cat]||[]).push(t);
+    });
+    let html = '';
+    Object.keys(groups).sort().forEach(cat => {
+      groups[cat].forEach(t => {
+        html += `
+          <div class="item-card">
+            <div class="item-card-cat">${esc(cat)}</div>
+            <div class="item-card-name">${esc(t.name)}</div>
+            <div class="item-card-desc">${esc(t.description||'Sin descripción')}</div>
+            <div class="item-card-footer">
+              <div class="item-card-price">${fmt$(t.price)}</div>
+              <button class="btn btn-primary btn-sm" onclick="openNewApptModal('treatment','${t.id}')">Reservar</button>
+            </div>
+          </div>`;
+      });
+    });
+    g('treatments-list').innerHTML = html;
+  }
+
+  // ── RENDER PRODUCTOS ──
+  function renderProducts(){
+    if(!cache.products.length){
+      g('products-list').innerHTML = '<div class="empty">No hay productos disponibles por el momento.</div>';
+      return;
+    }
+    g('products-list').innerHTML = cache.products.map(p => {
+      const inCart = cart.find(c => c.itemId === p.id);
+      const stockBadge = p.stock<=0 ? '<span class="item-card-stock low">Sin stock</span>'
+        : p.stock<=3 ? `<span class="item-card-stock low">Últimas ${p.stock} unidades</span>`
+        : `<span class="item-card-stock">Stock: ${p.stock}</span>`;
+      return `
+        <div class="item-card">
+          <div class="item-card-cat">${esc(p.category||'Producto')}</div>
+          <div class="item-card-name">${esc(p.name)}</div>
+          <div class="item-card-desc">${esc(p.description||'Sin descripción')}</div>
+          <div class="item-card-footer">
+            <div>
+              <div class="item-card-price">${fmt$(p.price)}</div>
+              ${stockBadge}
+            </div>
+            ${p.stock<=0
+              ? '<button class="btn btn-ghost btn-sm" disabled>Agotado</button>'
+              : inCart
+                ? `<button class="btn btn-ghost btn-sm" onclick="window.removeFromCart('${p.id}')">✓ En carrito</button>`
+                : `<button class="btn btn-primary btn-sm" onclick="window.addToCart('${p.id}')">+ Agregar</button>`}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── RENDER PROMOS ──
+  function renderPromos(){
+    if(!cache.promos.length){
+      g('promos-list').innerHTML = '<div class="empty">No hay promociones vigentes en este momento.</div>';
+      return;
+    }
+    g('promos-list').innerHTML = cache.promos.map(p => {
+      const items = (p.products||[]).map(i => `${i.name} x${i.qty}`).join(' · ');
+      return `
+        <div class="item-card">
+          <div class="item-card-cat">🌿 PROMO VIGENTE</div>
+          <div class="item-card-name">${esc(p.name)}</div>
+          <div class="item-card-desc">${esc(p.description||'')}${items?'<br><b style="color:var(--accent-deep);font-size:11px">Incluye:</b> '+esc(items):''}</div>
+          <div class="item-card-footer">
+            <div class="item-card-price">${fmt$(p.price)}</div>
+            <button class="btn btn-primary btn-sm" onclick="openNewApptModal('promo','${p.id}')">Reservar</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── RENDER MIS TURNOS ──
+  function renderMyAppts(){
+    if(!cache.appointments.length){
+      g('my-appts').innerHTML = '<div class="empty">Aún no tenés turnos reservados. ¡Reservá uno!</div>';
+      return;
+    }
+    const sorted = [...cache.appointments].sort((a,b) => (b.date||'').localeCompare(a.date||''));
+    g('my-appts').innerHTML = sorted.map(a => {
+      const tr = cache.treatments.find(t => t.id === a.treatmentId);
+      const pr = cache.promos.find(p => p.id === a.promoId);
+      const name = tr ? tr.name : pr ? pr.name+' (Promo)' : 'Servicio';
+      const cancelBtn = a.status === 'scheduled'
+        ? `<button class="btn btn-danger btn-sm" onclick="window.cancelAppt('${a.id}')">Cancelar</button>`
+        : '';
+      return `
+        <div class="appt-row">
+          <div class="appt-info">
+            <div class="appt-date-time">${a.date||'-'} · ${a.startTime||''}</div>
+            <div class="appt-treat">${esc(name)}</div>
+          </div>
+          <div>
+            <span class="badge badge-${a.status}">${statusLabel(a.status)}</span>
+            ${cancelBtn}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── RESERVAR TURNO ──
+  window.openNewApptModal = function(type, itemId){
+    set('appt-date','');
+    set('appt-time','');
+    set('appt-notes','');
+    set('appt-type', type || 'treatment');
+    updateApptServiceOpts();
+    if(itemId) set('appt-service', itemId);
+    openModal('appt-modal');
+  };
+
+  window.updateApptServiceOpts = function(){
+    const type = v('appt-type');
+    const list = type === 'promo' ? cache.promos : cache.treatments;
+    g('appt-service').innerHTML = '<option value="">Seleccionar...</option>' +
+      list.map(x => `<option value="${x.id}">${esc(x.name)} — ${fmt$(x.price)}</option>`).join('');
+  };
+
+  window.reserveAppointment = async () => {
+    const type = v('appt-type');
+    const serviceId = v('appt-service');
+    const date = v('appt-date');
+    const time = v('appt-time');
+    if(!serviceId){ toast('Seleccioná un servicio','error'); return; }
+    if(!date || !time){ toast('Elegí fecha y hora','error'); return; }
+    if(date < new Date().toISOString().split('T')[0]){ toast('La fecha no puede ser pasada','error'); return; }
+    try{
+      const data = {
+        date, startTime:time, endTime:'',
+        status:'scheduled',
+        clientId: currentClientId,
+        notes: v('appt-notes'),
+        fromPortal: true,
+        createdAt: serverTimestamp()
+      };
+      if(type === 'treatment') data.treatmentId = serviceId;
+      else data.promoId = serviceId;
+
+      const ref = await addDoc(collection(db,'appointments'), data);
+      cache.appointments.push({id:ref.id, ...data});
+      closeModal('appt-modal');
+      toast('¡Turno reservado! Te esperamos ✨');
+      renderMyAppts();
+    }catch(e){
+      toast('Error: '+e.message, 'error');
+      console.error(e);
+    }
+  };
+
+  window.cancelAppt = async (id) => {
+    if(!confirm('¿Estás segura de cancelar este turno?')) return;
+    try{
+      await updateDoc(doc(db,'appointments',id), {status:'cancelled'});
+      const a = cache.appointments.find(x => x.id === id);
+      if(a) a.status = 'cancelled';
+      toast('Turno cancelado');
+      renderMyAppts();
+    }catch(e){
+      toast('Error: '+e.message, 'error');
+    }
+  };
+
+  // ── CARRITO ──
+  window.addToCart = function(productId){
+    const p = cache.products.find(x => x.id === productId);
+    if(!p) return;
+    const existing = cart.find(c => c.itemId === productId);
+    if(existing){ existing.qty++; }
+    else { cart.push({itemId:p.id, name:p.name, price:p.price, qty:1, stock:p.stock}); }
+    renderCart();
+    renderProducts();
+  };
+  window.removeFromCart = function(productId){
+    cart = cart.filter(c => c.itemId !== productId);
+    renderCart();
+    renderProducts();
+  };
+  window.changeCartQty = function(productId, delta){
+    const item = cart.find(c => c.itemId === productId);
+    if(!item) return;
+    item.qty += delta;
+    if(item.qty <= 0) cart = cart.filter(c => c.itemId !== productId);
+    else if(item.qty > item.stock){ item.qty = item.stock; toast('Stock máximo alcanzado','error'); }
+    renderCart();
+    renderProducts();
+    if(g('checkout-modal').classList.contains('open')) renderCheckoutItems();
+  };
+
+  function renderCart(){
+    const total = cart.reduce((s,i) => s + i.price*i.qty, 0);
+    const count = cart.reduce((s,i) => s + i.qty, 0);
+    g('cart-count').textContent = count;
+    g('cart-total').textContent = fmt$(total);
+    g('cart-summary').classList.toggle('show', cart.length > 0);
+  }
+
+  window.openCheckoutModal = function(){
+    if(!cart.length){ toast('El carrito está vacío','error'); return; }
+    renderCheckoutItems();
+    openModal('checkout-modal');
+  };
+  function renderCheckoutItems(){
+    g('checkout-items').innerHTML = cart.map(c => `
+      <div class="cart-item">
+        <div>
+          <div style="font-weight:600">${esc(c.name)}</div>
+          <div style="font-size:11px;color:var(--text3)">${fmt$(c.price)} c/u</div>
+        </div>
+        <div class="cart-item-qty">
+          <button class="qty-btn" onclick="window.changeCartQty('${c.itemId}',-1)">−</button>
+          <span style="min-width:20px;text-align:center;font-weight:600">${c.qty}</span>
+          <button class="qty-btn" onclick="window.changeCartQty('${c.itemId}',1)">+</button>
+        </div>
+        <div style="font-weight:700;color:var(--accent-darker);min-width:80px;text-align:right">${fmt$(c.price*c.qty)}</div>
+      </div>
+    `).join('');
+    g('checkout-total').textContent = cart.reduce((s,i)=>s+i.price*i.qty,0).toLocaleString('es-AR',{minimumFractionDigits:2});
+  }
+
+  window.confirmPurchase = async () => {
+    if(!cart.length) return;
+    const total = cart.reduce((s,i) => s + i.price*i.qty, 0);
+    try{
+      // Registrar venta sin empleado (venta del portal)
+      const items = cart.map(c => ({itemId:c.itemId, type:'product', name:c.name, quantity:c.qty, price:c.price}));
+      await addDoc(collection(db,'sales'), {
+        clientId: currentClientId,
+        employeeId: '',
+        items, total,
+        paymentMethod: v('checkout-payment'),
+        fromPortal: true,
+        createdAt: serverTimestamp()
+      });
+      // Descontar stock
+      const proms = cart.map(c => {
+        const p = cache.products.find(x => x.id === c.itemId);
+        if(p) return updateDoc(doc(db,'products',p.id), {stock: Math.max(0, p.stock - c.qty)});
+      }).filter(Boolean);
+      await Promise.all(proms);
+      // Actualizar cache local
+      cart.forEach(c => {
+        const p = cache.products.find(x => x.id === c.itemId);
+        if(p) p.stock = Math.max(0, p.stock - c.qty);
+      });
+      cart = [];
+      renderCart();
+      renderProducts();
+      closeModal('checkout-modal');
+      toast('¡Compra confirmada! Pasá por el local a retirar ✨');
+    }catch(e){
+      toast('Error: '+e.message, 'error');
+      console.error(e);
+    }
+  };
+
+  // Cerrar modales al clickear fuera
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if(e.target === m) m.classList.remove('open'); });
+  });
+
+  // ── INIT ──
+  const savedCfg = loadConfig();
+  if(savedCfg?.apiKey){
+    g('loading-msg').textContent = 'Conectando...';
+    initFirebase(savedCfg);
+  } else {
+    hideLoading();
+    g('login-screen').classList.add('show');
+    window.doGoogleLogin = function(){
+      toast('Primero configurá Firebase','error');
+      setTimeout(()=>window.showConfigModal(), 300);
+    };
+  }
+</script>
+</body>
+</html>
