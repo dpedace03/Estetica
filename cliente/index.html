@@ -865,22 +865,25 @@
     m.addEventListener('click', e => { if(e.target === m) m.classList.remove('open'); });
   });
 
+  // CONFIGURACIÓN POR DEFECTO (embebida)
+  // Cualquier dispositivo entra y se conecta automáticamente.
+  const DEFAULT_CFG = {
+    apiKey: 'AIzaSyB9r51hXd6Yk3p_mIFUmf4-E99C1MZhuII',
+    authDomain: 'api-project-815594338054.firebaseapp.com',
+    projectId: 'api-project-815594338054',
+    storageBucket: 'api-project-815594338054.firebasestorage.app',
+    messagingSenderId: '815594338054',
+    appId: '1:815594338054:web:31e72a5658160a9ea15087',
+    firestoreDatabaseId: 'ai-studio-aesthetixprogest-19ecd1de-939e-41cd-8bf9-0789f04c2ddc'
+  };
+
   // ── INIT ──
   function startApp(){
     window.__appLoaded = true;
     try{
-      const savedCfg = loadConfig();
-      if(savedCfg?.apiKey){
-        g('loading-msg').textContent = 'Conectando...';
-        initFirebase(savedCfg);
-      } else {
-        hideLoading();
-        g('login-screen').classList.add('show');
-        window.doGoogleLogin = function(){
-          toast('Primero configurá Firebase','error');
-          setTimeout(()=>window.showConfigModal(), 300);
-        };
-      }
+      const savedCfg = loadConfig() || DEFAULT_CFG;
+      g('loading-msg').textContent = 'Conectando...';
+      initFirebase(savedCfg);
     } catch(err){
       console.error('Error iniciando app:', err);
       hideLoading();
