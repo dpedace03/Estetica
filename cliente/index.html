@@ -90,8 +90,16 @@
         <button class="btn-3d coral" onclick="showPage('appointments')">
           <div class="btn-3d-inner">
             <div class="btn-3d-icon">📅</div>
-            <div class="btn-3d-title">Turnos</div>
+            <div class="btn-3d-title">Mis Turnos</div>
             <div class="btn-3d-sub">Reservar o cancelar</div>
+          </div>
+        </button>
+
+        <button class="btn-3d" onclick="showPage('purchases')" style="grid-column:span 2">
+          <div class="btn-3d-inner">
+            <div class="btn-3d-icon">💲</div>
+            <div class="btn-3d-title">Mis Compras</div>
+            <div class="btn-3d-sub">Historial de pedidos</div>
           </div>
         </button>
       </div>
@@ -133,6 +141,15 @@
       </div>
       <div class="my-appts" id="my-appts"><div class="loader"><div class="spinner"></div></div></div>
     </div>
+
+    <!-- MIS COMPRAS -->
+    <div class="page" id="page-purchases">
+      <div class="back-bar">
+        <button class="back-btn" onclick="showPage('home')">← Volver</button>
+        <h2 class="page-title">Mis Compras</h2>
+      </div>
+      <div id="my-purchases"><div class="loader"><div class="spinner"></div></div></div>
+    </div>
   </main>
 
   <!-- CART -->
@@ -159,12 +176,31 @@
     </div>
     <div class="form-group">
       <label>Servicio</label>
-      <select id="appt-service"><option value="">Seleccionar...</option></select>
+      <select id="appt-service" onchange="renderCalendar()"><option value="">Seleccionar...</option></select>
     </div>
-    <div class="form-row">
-      <div class="form-group"><label>Fecha</label><input type="date" id="appt-date"></div>
-      <div class="form-group"><label>Hora</label><input type="time" id="appt-time"></div>
+
+    <div class="form-group">
+      <label>Elegí día</label>
+      <div class="calendar">
+        <div class="cal-header">
+          <button type="button" class="cal-nav" onclick="changeMonth(-1)">‹</button>
+          <span id="cal-month-label"></span>
+          <button type="button" class="cal-nav" onclick="changeMonth(1)">›</button>
+        </div>
+        <div class="cal-weekdays">
+          <span>Dom</span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
+        </div>
+        <div class="cal-days" id="cal-days"></div>
+      </div>
+      <input type="hidden" id="appt-date">
     </div>
+
+    <div class="form-group" id="time-slots-wrap" style="display:none">
+      <label>Elegí horario</label>
+      <div class="time-slots" id="time-slots"></div>
+      <input type="hidden" id="appt-time">
+    </div>
+
     <div class="form-group"><label>Notas (opcional)</label><textarea id="appt-notes" placeholder="Algo que debamos saber..."></textarea></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('appt-modal')">Cancelar</button>
@@ -314,6 +350,7 @@
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     g('page-'+page).classList.add('active');
     if(page === 'appointments') renderMyAppts();
+    if(page === 'purchases') renderMyPurchases();
     if(page === 'home') renderCart();
     window.scrollTo({top:0, behavior:'smooth'});
   };
@@ -330,17 +367,20 @@
       // Cargar/crear cliente vinculado al user
       await ensureClient();
       // Cargar catálogos
-      const [treatments, products, promos, appointments] = await Promise.all([
-        getAll('treatments'), getAll('products'), getAll('promos'), getAll('appointments')
+      const [treatments, products, promos, appointments, sales] = await Promise.all([
+        getAll('treatments'), getAll('products'), getAll('promos'), getAll('appointments'), getAll('sales')
       ]);
       cache.treatments = treatments;
       cache.products = products;
       cache.promos = promos.filter(p => p.active);
+      cache.allAppointments = appointments;
       cache.appointments = appointments.filter(a => a.clientId === currentClientId);
+      cache.sales = sales.filter(s => s.clientId === currentClientId);
       renderTreatments();
       renderProducts();
       renderPromos();
       renderMyAppts();
+      renderMyPurchases();
     }catch(e){
       toast('Error cargando datos: '+e.message,'error');
       console.error(e);
@@ -483,7 +523,56 @@
     }).join('');
   }
 
-  // ── RESERVAR TURNO ──
+  // ── RENDER MIS COMPRAS ──
+  function renderMyPurchases(){
+    if(!cache.sales || !cache.sales.length){
+      g('my-purchases').innerHTML = '<div class="empty">Todavía no realizaste compras. Visitá la sección Productos.</div>';
+      return;
+    }
+    const sorted = [...cache.sales].sort((a,b) => {
+      const da = a.createdAt?.toDate?.() ?? new Date(0);
+      const db_ = b.createdAt?.toDate?.() ?? new Date(0);
+      return db_ - da;
+    });
+    let totalAcum = 0;
+    const rows = sorted.map(s => {
+      totalAcum += s.total || 0;
+      const itemsHtml = (s.items||[]).map(i =>
+        `<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:12px;color:var(--text2)"><span>${esc(i.name)} × ${i.quantity}</span><span>${fmt$(i.price * i.quantity)}</span></div>`
+      ).join('');
+      return `
+        <div class="appt-row" style="flex-direction:column;align-items:stretch;gap:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="appt-date-time">${fmtDate(s.createdAt)}</div>
+              <div class="appt-treat">Pago: ${esc(s.paymentMethod||'—')}</div>
+            </div>
+            <div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--accent-darker);font-weight:700">${fmt$(s.total)}</div>
+          </div>
+          <div style="border-top:1px solid var(--border-soft, rgba(197,220,215,.4));padding-top:8px">${itemsHtml}</div>
+        </div>`;
+    }).join('');
+    g('my-purchases').innerHTML = rows + `
+      <div style="text-align:right;padding:18px 20px;margin-top:10px;background:linear-gradient(135deg, rgba(168,213,200,.3), rgba(180,216,224,.2));border-radius:16px;font-family:'Playfair Display',serif;font-size:18px;color:var(--accent-darker);font-weight:700">
+        Total acumulado: ${fmt$(totalAcum)}
+      </div>`;
+  }
+
+  // ── RESERVAR TURNO con calendario ──
+  let calCurrentDate = new Date(); // mes mostrado actualmente
+  let calSelectedDate = null;     // 'YYYY-MM-DD'
+  let calSelectedTime = null;     // 'HH:MM'
+
+  // Horarios disponibles (de 9 a 19 cada 30 min)
+  const TIME_SLOTS = (()=>{
+    const arr = [];
+    for(let h=9; h<=19; h++){
+      arr.push(String(h).padStart(2,'0')+':00');
+      if(h<19) arr.push(String(h).padStart(2,'0')+':30');
+    }
+    return arr;
+  })();
+
   window.openNewApptModal = function(type, itemId){
     set('appt-date','');
     set('appt-time','');
@@ -491,6 +580,11 @@
     set('appt-type', type || 'treatment');
     updateApptServiceOpts();
     if(itemId) set('appt-service', itemId);
+    calCurrentDate = new Date();
+    calSelectedDate = null;
+    calSelectedTime = null;
+    renderCalendar();
+    g('time-slots-wrap').style.display = 'none';
     openModal('appt-modal');
   };
 
@@ -501,14 +595,91 @@
       list.map(x => `<option value="${x.id}">${esc(x.name)} — ${fmt$(x.price)}</option>`).join('');
   };
 
+  window.changeMonth = function(delta){
+    calCurrentDate.setMonth(calCurrentDate.getMonth() + delta);
+    renderCalendar();
+  };
+
+  window.renderCalendar = function(){
+    const meses = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const y = calCurrentDate.getFullYear();
+    const m = calCurrentDate.getMonth();
+    g('cal-month-label').textContent = meses[m] + ' ' + y;
+
+    const firstDay = new Date(y, m, 1).getDay(); // 0=domingo
+    const daysInMonth = new Date(y, m+1, 0).getDate();
+    const today = new Date(); today.setHours(0,0,0,0);
+    const todayStr = today.toISOString().split('T')[0];
+
+    // Fechas que tengo turnos propios programados
+    const myAppts = cache.appointments
+      .filter(a => a.status === 'scheduled')
+      .map(a => a.date);
+
+    let html = '';
+    // Espacios vacíos antes del primer día
+    for(let i=0; i<firstDay; i++) html += '<div class="cal-day empty"></div>';
+
+    for(let d=1; d<=daysInMonth; d++){
+      const dateStr = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const dateObj = new Date(y, m, d);
+      const isPast = dateObj < today;
+      const isToday = dateStr === todayStr;
+      const isSelected = dateStr === calSelectedDate;
+      const hasAppt = myAppts.includes(dateStr);
+      const classes = ['cal-day'];
+      if(isPast) classes.push('disabled');
+      if(isToday) classes.push('today');
+      if(isSelected) classes.push('selected');
+      if(hasAppt) classes.push('has-appt');
+      const onclick = isPast ? '' : `onclick="window.selectDate('${dateStr}')"`;
+      html += `<div class="${classes.join(' ')}" ${onclick}>${d}</div>`;
+    }
+    g('cal-days').innerHTML = html;
+  };
+
+  window.selectDate = function(dateStr){
+    calSelectedDate = dateStr;
+    calSelectedTime = null;
+    set('appt-date', dateStr);
+    set('appt-time', '');
+    renderCalendar();
+    renderTimeSlots();
+    g('time-slots-wrap').style.display = '';
+  };
+
+  function renderTimeSlots(){
+    if(!calSelectedDate){ g('time-slots').innerHTML = ''; return; }
+    // Buscar qué horarios ya están tomados ese día (de TODA la base, no solo míos)
+    const all = cache.allAppointments || cache.appointments;
+    const taken = all
+      .filter(a => a.date === calSelectedDate && a.status === 'scheduled')
+      .map(a => a.startTime);
+    g('time-slots').innerHTML = TIME_SLOTS.map(t => {
+      const isTaken = taken.includes(t);
+      const isSelected = t === calSelectedTime;
+      const classes = ['time-slot'];
+      if(isTaken) classes.push('taken');
+      if(isSelected) classes.push('selected');
+      const onclick = isTaken ? '' : `onclick="window.selectTime('${t}')"`;
+      return `<div class="${classes.join(' ')}" ${onclick}>${t}</div>`;
+    }).join('');
+  }
+
+  window.selectTime = function(time){
+    calSelectedTime = time;
+    set('appt-time', time);
+    renderTimeSlots();
+  };
+
   window.reserveAppointment = async () => {
     const type = v('appt-type');
     const serviceId = v('appt-service');
     const date = v('appt-date');
     const time = v('appt-time');
     if(!serviceId){ toast('Seleccioná un servicio','error'); return; }
-    if(!date || !time){ toast('Elegí fecha y hora','error'); return; }
-    if(date < new Date().toISOString().split('T')[0]){ toast('La fecha no puede ser pasada','error'); return; }
+    if(!date){ toast('Elegí un día en el calendario','error'); return; }
+    if(!time){ toast('Elegí un horario','error'); return; }
     try{
       const data = {
         date, startTime:time, endTime:'',
@@ -522,7 +693,10 @@
       else data.promoId = serviceId;
 
       const ref = await addDoc(collection(db,'appointments'), data);
-      cache.appointments.push({id:ref.id, ...data});
+      const newAppt = {id:ref.id, ...data};
+      cache.appointments.push(newAppt);
+      if(!cache.allAppointments) cache.allAppointments = [];
+      cache.allAppointments.push(newAppt);
       closeModal('appt-modal');
       toast('¡Turno reservado! Te esperamos ✨');
       renderMyAppts();
@@ -538,6 +712,8 @@
       await updateDoc(doc(db,'appointments',id), {status:'cancelled'});
       const a = cache.appointments.find(x => x.id === id);
       if(a) a.status = 'cancelled';
+      const a2 = (cache.allAppointments||[]).find(x => x.id === id);
+      if(a2) a2.status = 'cancelled';
       toast('Turno cancelado');
       renderMyAppts();
     }catch(e){
@@ -608,13 +784,21 @@
     try{
       // Registrar venta sin empleado (venta del portal)
       const items = cart.map(c => ({itemId:c.itemId, type:'product', name:c.name, quantity:c.qty, price:c.price}));
-      await addDoc(collection(db,'sales'), {
+      const saleData = {
         clientId: currentClientId,
         employeeId: '',
         items, total,
         paymentMethod: v('checkout-payment'),
         fromPortal: true,
         createdAt: serverTimestamp()
+      };
+      const ref = await addDoc(collection(db,'sales'), saleData);
+      // Agregar al cache local (con fecha en JS porque serverTimestamp aún no se resolvió)
+      if(!cache.sales) cache.sales = [];
+      cache.sales.unshift({
+        id: ref.id,
+        ...saleData,
+        createdAt: { toDate: () => new Date() }
       });
       // Descontar stock
       const proms = cart.map(c => {
@@ -630,6 +814,7 @@
       cart = [];
       renderCart();
       renderProducts();
+      renderMyPurchases();
       closeModal('checkout-modal');
       toast('¡Compra confirmada! Pasá por el local a retirar ✨');
     }catch(e){

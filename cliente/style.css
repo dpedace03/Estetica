@@ -511,3 +511,148 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent-light);backgro
   .btn-3d-icon{width:54px;height:54px;font-size:24px}
   .btn-3d-title{font-size:17px}
 }
+
+/* ═══════════════════════════════════════════════════
+   CALENDARIO INTERACTIVO
+   ═══════════════════════════════════════════════════ */
+
+.calendar{
+  background:rgba(255,255,255,.55);
+  border-radius:16px;
+  padding:14px 12px;
+  border:1px solid var(--border-glass);
+  box-shadow:var(--shadow-sm);
+}
+.cal-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:12px;
+  padding:0 4px;
+}
+.cal-header span{
+  font-family:'Playfair Display',serif;
+  font-size:15px;
+  font-weight:600;
+  color:var(--accent-darker);
+  text-transform:capitalize;
+}
+.cal-nav{
+  width:32px;height:32px;
+  border-radius:50%;
+  background:rgba(168,213,200,.4);
+  border:none;cursor:pointer;
+  color:var(--accent-darker);
+  font-size:18px;font-weight:600;
+  transition:all .2s;
+  display:flex;align-items:center;justify-content:center;
+}
+.cal-nav:hover{background:var(--mint);transform:scale(1.1)}
+.cal-weekdays{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:4px;
+  margin-bottom:6px;
+}
+.cal-weekdays span{
+  text-align:center;
+  font-size:10px;
+  font-weight:700;
+  color:var(--text3);
+  letter-spacing:.5px;
+  padding:6px 0;
+  text-transform:uppercase;
+}
+.cal-days{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:4px;
+}
+.cal-day{
+  aspect-ratio:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:13px;
+  font-weight:500;
+  color:var(--text);
+  background:transparent;
+  border:1px solid transparent;
+  transition:all .2s;
+  position:relative;
+}
+.cal-day:hover:not(.disabled):not(.empty){
+  background:rgba(168,213,200,.3);
+  border-color:var(--accent-light);
+}
+.cal-day.today{
+  background:rgba(180,216,224,.4);
+  font-weight:700;
+  color:var(--accent-darker);
+}
+.cal-day.disabled{
+  color:var(--text3);
+  opacity:.4;
+  cursor:not-allowed;
+}
+.cal-day.empty{
+  cursor:default;
+}
+.cal-day.selected{
+  background:linear-gradient(135deg, var(--mint), var(--sky));
+  color:var(--accent-darker);
+  font-weight:700;
+  box-shadow:0 4px 12px rgba(94,156,145,.3), inset 0 1px 0 rgba(255,255,255,.5);
+  border-color:var(--accent-light);
+}
+.cal-day.has-appt::after{
+  content:'';
+  position:absolute;
+  bottom:4px;left:50%;
+  transform:translateX(-50%);
+  width:4px;height:4px;
+  border-radius:50%;
+  background:var(--accent);
+}
+
+/* HORARIOS */
+.time-slots{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(80px,1fr));
+  gap:8px;
+  margin-top:8px;
+}
+.time-slot{
+  padding:10px 4px;
+  text-align:center;
+  background:rgba(255,255,255,.7);
+  border:1px solid var(--border);
+  border-radius:12px;
+  cursor:pointer;
+  font-family:'DM Sans',sans-serif;
+  font-size:13px;
+  font-weight:600;
+  color:var(--text);
+  transition:all .2s;
+}
+.time-slot:hover:not(.taken){
+  background:rgba(168,213,200,.4);
+  border-color:var(--accent-light);
+  transform:translateY(-2px);
+}
+.time-slot.selected{
+  background:linear-gradient(135deg, var(--mint), var(--sky));
+  border-color:var(--accent);
+  color:var(--accent-darker);
+  font-weight:700;
+  box-shadow:0 4px 10px rgba(94,156,145,.25);
+}
+.time-slot.taken{
+  background:rgba(214,138,138,.15);
+  color:var(--text3);
+  cursor:not-allowed;
+  text-decoration:line-through;
+  opacity:.5;
+}
