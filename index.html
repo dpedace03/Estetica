@@ -404,7 +404,7 @@
     g('history-treat-title').textContent=`📋 Tratamientos — ${name}`;openModal('history-treat-modal');
     const appts=cache.appointments.filter(a=>a.clientId===clientId).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
     if(!appts.length){g('history-treat-body').innerHTML='<div class="empty">Sin tratamientos registrados</div>';return;}
-    g('history-treat-body').innerHTML=appts.map(a=>{const tr=cache.treatments.find(t=>t.id===a.treatmentId);const em=cache.employees.find(e=>e.id===a.employeeId);const badge=`<span class="badge badge-${a.status}">${statusLabel(a.status)}</span>`;return `<div class="history-item"><div class="history-date">${a.date||'-'} ${a.startTime?'· '+a.startTime:''}</div><div class="history-main">${tr?esc(tr.name):'Sin tratamiento'}</div><div class="history-sub">${em?'Atendió: '+esc(em.name):''} ${badge}</div></div>`;}).join('');
+    g('history-treat-body').innerHTML=appts.map(a=>{const tr=cache.treatments.find(t=>t.id===a.treatmentId);const pr=cache.promos.find(p=>p.id===a.promoId);const em=cache.employees.find(e=>e.id===a.employeeId);const serviceName=tr?esc(tr.name):pr?esc(pr.name)+' (Promo)':'Sin tratamiento';const badge=`<span class="badge badge-${a.status}">${statusLabel(a.status)}</span>`;return `<div class="history-item"><div class="history-date">${a.date||'-'} ${a.startTime?'· '+a.startTime:''}</div><div class="history-main">${serviceName}</div><div class="history-sub">${em?'Atendió: '+esc(em.name):''} ${badge}</div></div>`;}).join('');
   };
   window.showClientSalesHistory=(clientId,name)=>{
     g('history-sales-title').textContent=`💲 Compras — ${name}`;openModal('history-sales-modal');
@@ -469,18 +469,22 @@
     const list=cache.appointments.filter(a=>!filter||a.status===filter).sort((a,b)=>(a.date||'').localeCompare(b.date||''));
     if(!list.length){emptyRow('appts-body',8);return;}
     g('appts-body').innerHTML=list.map(a=>{
-      const cl=cache.clients.find(c=>c.id===a.clientId);const tr=cache.treatments.find(t=>t.id===a.treatmentId);const em=cache.employees.find(e=>e.id===a.employeeId);
+      const cl=cache.clients.find(c=>c.id===a.clientId);
+      const tr=cache.treatments.find(t=>t.id===a.treatmentId);
+      const pr=cache.promos.find(p=>p.id===a.promoId);
+      const em=cache.employees.find(e=>e.id===a.employeeId);
+      const serviceName = tr ? esc(tr.name) : pr ? esc(pr.name)+' <span style="font-size:10px;color:var(--accent2)">(Promo)</span>' : '—';
       let actions='';
       if(a.status==='scheduled'){actions=`<div class="status-actions"><button class="btn btn-success btn-sm" onclick="window._changeStatus('${a.id}','completed')">✓ Cumplido</button><button class="btn btn-danger btn-sm" onclick="window._changeStatus('${a.id}','cancelled')">✕ Cancelar</button></div>`;}
       else if(a.status==='cancelled'){actions=`<button class="btn btn-ghost btn-sm" onclick="window._changeStatus('${a.id}','scheduled')">↺ Reprogramar</button>`;}
       else{actions=`<span style="font-size:11px;color:var(--text3)">—</span>`;}
       const repeatBtn=a.status==='scheduled'?`<button class="btn-repeat" onclick="window.openRepeatModal('${a.id}')" title="Repetir turno">R</button>`:'';
-      return `<tr><td>${a.date||'-'}</td><td>${a.startTime||'-'}${a.endTime?' - '+a.endTime:''}</td><td style="font-weight:500">${cl?esc(cl.name):'—'}</td><td>${tr?esc(tr.name):'—'}</td><td>${em?esc(em.name):'—'}</td><td><span class="badge badge-${a.status}">${statusLabel(a.status)}</span></td><td>${actions}</td><td style="white-space:nowrap">${repeatBtn} <button class="btn btn-ghost btn-sm" onclick="window._editAppt('${a.id}')">✏</button> <button class="btn btn-danger btn-sm" onclick="window._del('appointments','${a.id}')">🗑</button></td></tr>`;
+      return `<tr><td>${a.date||'-'}</td><td>${a.startTime||'-'}${a.endTime?' - '+a.endTime:''}</td><td style="font-weight:500">${cl?esc(cl.name):'—'}</td><td>${serviceName}</td><td>${em?esc(em.name):'—'}</td><td><span class="badge badge-${a.status}">${statusLabel(a.status)}</span></td><td>${actions}</td><td style="white-space:nowrap">${repeatBtn} <button class="btn btn-ghost btn-sm" onclick="window._editAppt('${a.id}')">✏</button> <button class="btn btn-danger btn-sm" onclick="window._del('appointments','${a.id}')">🗑</button></td></tr>`;
     }).join('');
   };
   window.openRepeatModal=id=>{repeatApptId=id;set('repeat-weeks','');g('repeat-preview').textContent='';openModal('repeat-modal');};
   g('repeat-weeks').addEventListener('input',()=>{const weeks=parseInt(v('repeat-weeks'));const appt=cache.appointments.find(a=>a.id===repeatApptId);if(!appt||!appt.date||isNaN(weeks)||weeks<1){g('repeat-preview').textContent='';return;}const dates=[];for(let i=1;i<=weeks;i++){const d=new Date(appt.date+'T12:00:00');d.setDate(d.getDate()+7*i);dates.push(d.toLocaleDateString('es-AR'));}g('repeat-preview').textContent='Se crearán turnos el: '+dates.join(', ');});
-  window.doRepeatAppointment=async()=>{if(needsDb())return;const weeks=parseInt(v('repeat-weeks'));if(!weeks||weeks<1){toast('Ingresá un número de semanas válido','error');return;}const appt=cache.appointments.find(a=>a.id===repeatApptId);if(!appt){toast('Turno no encontrado','error');return;}try{const proms=[];for(let i=1;i<=weeks;i++){const d=new Date(appt.date+'T12:00:00');d.setDate(d.getDate()+7*i);const newDate=d.toISOString().split('T')[0];proms.push(addOne('appointments',{date:newDate,startTime:appt.startTime||'',endTime:appt.endTime||'',status:'scheduled',clientId:appt.clientId||'',treatmentId:appt.treatmentId||'',employeeId:appt.employeeId||'',notes:appt.notes||''}));}await Promise.all(proms);closeModal('repeat-modal');toast(`${weeks} turno(s) creado(s) ✓`);await loadAppointments();renderDashboard();}catch(e){toast(e.message,'error');}};
+  window.doRepeatAppointment=async()=>{if(needsDb())return;const weeks=parseInt(v('repeat-weeks'));if(!weeks||weeks<1){toast('Ingresá un número de semanas válido','error');return;}const appt=cache.appointments.find(a=>a.id===repeatApptId);if(!appt){toast('Turno no encontrado','error');return;}try{const proms=[];for(let i=1;i<=weeks;i++){const d=new Date(appt.date+'T12:00:00');d.setDate(d.getDate()+7*i);const newDate=d.toISOString().split('T')[0];const newAppt={date:newDate,startTime:appt.startTime||'',endTime:appt.endTime||'',status:'scheduled',clientId:appt.clientId||'',treatmentId:appt.treatmentId||'',employeeId:appt.employeeId||'',notes:appt.notes||''};if(appt.promoId)newAppt.promoId=appt.promoId;proms.push(addOne('appointments',newAppt));}await Promise.all(proms);closeModal('repeat-modal');toast(`${weeks} turno(s) creado(s) ✓`);await loadAppointments();renderDashboard();}catch(e){toast(e.message,'error');}};
   window._changeStatus=async(id,newStatus)=>{if(needsDb())return;try{await updateOne('appointments',id,{status:newStatus});toast('Estado actualizado');await loadAppointments();renderDashboard();}catch(e){toast(e.message,'error');}};
   window.openApptModal=()=>{rst(['appt-id','appt-date','appt-start','appt-end','appt-notes']);set('appt-status','scheduled');g('appt-status').disabled=false;set('appt-modal-title','Nuevo Turno');openModal('appt-modal');};
   window._editAppt=id=>{const a=cache.appointments.find(x=>x.id===id);if(!a)return;set('appt-modal-title','Editar Turno');set('appt-id',a.id);set('appt-date',a.date);set('appt-start',a.startTime);set('appt-end',a.endTime);set('appt-status',a.status);set('appt-client',a.clientId);set('appt-treatment',a.treatmentId);set('appt-employee',a.employeeId);set('appt-notes',a.notes);g('appt-status').disabled=a.status==='completed';openModal('appt-modal');};
@@ -530,7 +534,7 @@
     const res=sumSales-sumExp;g('stat-result').textContent=fmt$(res);g('stat-result').style.color=res>=0?'var(--success)':'var(--danger)';
     g('stat-appts').textContent=apptsInRange.filter(a=>a.status==='scheduled').length;g('stat-completed').textContent=apptsInRange.filter(a=>a.status==='completed').length;g('stat-cancelled').textContent=apptsInRange.filter(a=>a.status==='cancelled').length;g('stat-clients').textContent=cache.clients.length;
     const upcoming=cache.appointments.filter(a=>a.date>=td&&a.status==='scheduled').sort((a,b)=>(a.date+a.startTime).localeCompare(b.date+b.startTime)).slice(0,5);
-    g('dash-appts').innerHTML=upcoming.length?upcoming.map(a=>{const cl=cache.clients.find(c=>c.id===a.clientId),tr=cache.treatments.find(t=>t.id===a.treatmentId);return `<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)"><div><div style="font-weight:500">${cl?esc(cl.name):'—'}</div><div style="font-size:11px;color:var(--text2)">${tr?esc(tr.name):'—'}</div></div><div style="text-align:right"><div style="font-size:12px">${a.date}</div><div style="font-size:12px;color:var(--accent);font-weight:600">${a.startTime||''}</div></div></div>`;}).join(''):'<div class="empty">Sin turnos próximos</div>';
+    g('dash-appts').innerHTML=upcoming.length?upcoming.map(a=>{const cl=cache.clients.find(c=>c.id===a.clientId),tr=cache.treatments.find(t=>t.id===a.treatmentId),pr=cache.promos.find(p=>p.id===a.promoId);const serviceName=tr?esc(tr.name):pr?esc(pr.name)+' (Promo)':'—';return `<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)"><div><div style="font-weight:500">${cl?esc(cl.name):'—'}</div><div style="font-size:11px;color:var(--text2)">${serviceName}</div></div><div style="text-align:right"><div style="font-size:12px">${a.date}</div><div style="font-size:12px;color:var(--accent);font-weight:600">${a.startTime||''}</div></div></div>`;}).join(''):'<div class="empty">Sin turnos próximos</div>';
     const ls=cache.products.filter(p=>p.stock<=5).sort((a,b)=>a.stock-b.stock).slice(0,5);
     g('dash-stock').innerHTML=ls.length?ls.map(p=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-weight:500">${esc(p.name)}</span><span style="color:${p.stock<=2?'var(--danger)':'var(--accent)'};font-weight:600">Stock: ${p.stock}</span></div>`).join(''):'<div class="empty">✓ Stock normal</div>';
     const rs=(hasRange?salesInRange:[...cache.sales]).sort((a,b)=>{const da=a.createdAt?.toDate?.()??new Date(0),db_=b.createdAt?.toDate?.()??new Date(0);return db_-da;}).slice(0,5);
@@ -539,10 +543,23 @@
     g('dash-expenses').innerHTML=rg.length?`<table><thead><tr><th>Fecha</th><th>Descripción</th><th>Monto</th></tr></thead><tbody>${rg.map(e=>`<tr><td>${e.date||'-'}</td><td>${esc(e.description)}</td><td style="color:var(--danger);font-weight:700">${fmt$(e.amount)}</td></tr>`).join('')}</tbody></table>`:'<div class="empty">Sin gastos</div>';
   }
 
+  // CONFIGURACIÓN POR DEFECTO (embebida)
+  // Cualquier dispositivo entra y se conecta automáticamente.
+  // Si querés cambiarla, usá el botón ⚙ Firebase de la topbar.
+  const DEFAULT_CFG = {
+    apiKey: 'AIzaSyB9r51hXd6Yk3p_mIFUmf4-E99C1MZhuII',
+    authDomain: 'api-project-815594338054.firebaseapp.com',
+    projectId: 'api-project-815594338054',
+    storageBucket: 'api-project-815594338054.firebasestorage.app',
+    messagingSenderId: '815594338054',
+    appId: '1:815594338054:web:31e72a5658160a9ea15087',
+    firestoreDatabaseId: 'ai-studio-aesthetixprogest-19ecd1de-939e-41cd-8bf9-0789f04c2ddc'
+  };
+
   // INIT
-  const savedCfg=loadConfig();
-  if(savedCfg?.apiKey){g('loading-msg').textContent='Conectando...';initFirebase(savedCfg);}
-  else{hideLoading();g('login-screen').classList.add('show');g('sidebar').style.display='none';g('main').style.display='none';window.doGoogleLogin=function(){toast('Primero configurá Firebase para poder iniciar sesión','error');setTimeout(()=>window.showConfigModal(),300);};}
+  const savedCfg = loadConfig() || DEFAULT_CFG;
+  g('loading-msg').textContent='Conectando...';
+  initFirebase(savedCfg);
 </script>
 </body>
 </html>
