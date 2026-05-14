@@ -132,14 +132,67 @@
       <div id="promos-list" class="items-grid"><div class="loader"><div class="spinner"></div></div></div>
     </div>
 
-    <!-- TURNOS -->
+    <!-- TURNOS - con calendario directo -->
     <div class="page" id="page-appointments">
       <div class="back-bar">
         <button class="back-btn" onclick="showPage('home')">← Volver</button>
-        <h2 class="page-title">Mis Turnos</h2>
-        <button class="btn btn-primary" onclick="openNewApptModal()" style="margin-left:auto">+ Reservar Turno</button>
+        <h2 class="page-title">Turnos</h2>
       </div>
-      <div class="my-appts" id="my-appts"><div class="loader"><div class="spinner"></div></div></div>
+
+      <!-- PASO 1: elegir servicio -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="section-title">1. Elegí tu servicio</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tipo</label>
+            <select id="appt-type" onchange="updateApptServiceOpts()">
+              <option value="treatment">Tratamiento</option>
+              <option value="promo">Promo</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Servicio</label>
+            <select id="appt-service" onchange="onServiceChange()"><option value="">Seleccionar...</option></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASO 2: calendario -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="section-title">2. Elegí el día</div>
+        <div class="calendar">
+          <div class="cal-header">
+            <button type="button" class="cal-nav" onclick="changeMonth(-1)">‹</button>
+            <span id="cal-month-label"></span>
+            <button type="button" class="cal-nav" onclick="changeMonth(1)">›</button>
+          </div>
+          <div class="cal-weekdays">
+            <span>Dom</span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
+          </div>
+          <div class="cal-days" id="cal-days"></div>
+        </div>
+        <input type="hidden" id="appt-date">
+      </div>
+
+      <!-- PASO 3: horarios (aparece al elegir día) -->
+      <div class="card" id="time-slots-wrap" style="display:none;margin-bottom:20px">
+        <div class="section-title">3. Elegí el horario</div>
+        <div class="time-slots" id="time-slots"></div>
+        <input type="hidden" id="appt-time">
+        <div class="form-group" style="margin-top:16px">
+          <label>Notas (opcional)</label>
+          <textarea id="appt-notes" placeholder="Algo que debamos saber..."></textarea>
+        </div>
+        <div style="text-align:right">
+          <button class="btn btn-primary" onclick="reserveAppointment()">Confirmar Reserva ✨</button>
+        </div>
+      </div>
+
+      <!-- MIS TURNOS -->
+      <div class="card">
+        <div class="section-title">Mis turnos reservados</div>
+        <div class="my-appts" id="my-appts"><div class="loader"><div class="spinner"></div></div></div>
+      </div>
     </div>
 
     <!-- MIS COMPRAS -->
@@ -162,52 +215,6 @@
 </div>
 
 <!-- ═══════════ MODALES ═══════════ -->
-
-<!-- Reservar turno -->
-<div class="modal-overlay" id="appt-modal">
-  <div class="modal">
-    <h3>Reservar Turno</h3>
-    <div class="form-group">
-      <label>Tipo de servicio</label>
-      <select id="appt-type" onchange="updateApptServiceOpts()">
-        <option value="treatment">Tratamiento</option>
-        <option value="promo">Promo</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Servicio</label>
-      <select id="appt-service" onchange="renderCalendar()"><option value="">Seleccionar...</option></select>
-    </div>
-
-    <div class="form-group">
-      <label>Elegí día</label>
-      <div class="calendar">
-        <div class="cal-header">
-          <button type="button" class="cal-nav" onclick="changeMonth(-1)">‹</button>
-          <span id="cal-month-label"></span>
-          <button type="button" class="cal-nav" onclick="changeMonth(1)">›</button>
-        </div>
-        <div class="cal-weekdays">
-          <span>Dom</span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
-        </div>
-        <div class="cal-days" id="cal-days"></div>
-      </div>
-      <input type="hidden" id="appt-date">
-    </div>
-
-    <div class="form-group" id="time-slots-wrap" style="display:none">
-      <label>Elegí horario</label>
-      <div class="time-slots" id="time-slots"></div>
-      <input type="hidden" id="appt-time">
-    </div>
-
-    <div class="form-group"><label>Notas (opcional)</label><textarea id="appt-notes" placeholder="Algo que debamos saber..."></textarea></div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('appt-modal')">Cancelar</button>
-      <button class="btn btn-primary" onclick="reserveAppointment()">Confirmar Reserva</button>
-    </div>
-  </div>
-</div>
 
 <!-- Checkout -->
 <div class="modal-overlay" id="checkout-modal">
@@ -349,10 +356,33 @@
   window.showPage = function(page){
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     g('page-'+page).classList.add('active');
-    if(page === 'appointments') renderMyAppts();
+    if(page === 'appointments'){
+      renderMyAppts();
+      initApptPage();
+    }
     if(page === 'purchases') renderMyPurchases();
     if(page === 'home') renderCart();
     window.scrollTo({top:0, behavior:'smooth'});
+  };
+
+  // Inicializar la página de turnos: limpiar selección y poblar selects
+  function initApptPage(){
+    set('appt-type','treatment');
+    set('appt-service','');
+    set('appt-date','');
+    set('appt-time','');
+    set('appt-notes','');
+    updateApptServiceOpts();
+    calCurrentDate = new Date();
+    calSelectedDate = null;
+    calSelectedTime = null;
+    g('time-slots-wrap').style.display = 'none';
+    renderCalendar();
+  }
+
+  window.onServiceChange = function(){
+    // Si ya había día y hora seleccionados, los mantengo
+    renderCalendar();
   };
 
   // ── CRUD READ ──
@@ -435,7 +465,7 @@
             <div class="item-card-desc">${esc(t.description||'Sin descripción')}</div>
             <div class="item-card-footer">
               <div class="item-card-price">${fmt$(t.price)}</div>
-              <button class="btn btn-primary btn-sm" onclick="openNewApptModal('treatment','${t.id}')">Reservar</button>
+              <button class="btn btn-primary btn-sm" onclick="bookService('treatment','${t.id}')">Reservar</button>
             </div>
           </div>`;
       });
@@ -489,7 +519,7 @@
           <div class="item-card-desc">${esc(p.description||'')}${items?'<br><b style="color:var(--accent-deep);font-size:11px">Incluye:</b> '+esc(items):''}</div>
           <div class="item-card-footer">
             <div class="item-card-price">${fmt$(p.price)}</div>
-            <button class="btn btn-primary btn-sm" onclick="openNewApptModal('promo','${p.id}')">Reservar</button>
+            <button class="btn btn-primary btn-sm" onclick="bookService('promo','${p.id}')">Reservar</button>
           </div>
         </div>`;
     }).join('');
@@ -573,19 +603,15 @@
     return arr;
   })();
 
-  window.openNewApptModal = function(type, itemId){
-    set('appt-date','');
-    set('appt-time','');
-    set('appt-notes','');
-    set('appt-type', type || 'treatment');
-    updateApptServiceOpts();
-    if(itemId) set('appt-service', itemId);
-    calCurrentDate = new Date();
-    calSelectedDate = null;
-    calSelectedTime = null;
-    renderCalendar();
-    g('time-slots-wrap').style.display = 'none';
-    openModal('appt-modal');
+  // Ir directo a la página de Turnos con el servicio preseleccionado
+  window.bookService = function(type, itemId){
+    showPage('appointments');
+    setTimeout(() => {
+      set('appt-type', type);
+      updateApptServiceOpts();
+      set('appt-service', itemId);
+      renderCalendar();
+    }, 100);
   };
 
   window.updateApptServiceOpts = function(){
@@ -697,9 +723,20 @@
       cache.appointments.push(newAppt);
       if(!cache.allAppointments) cache.allAppointments = [];
       cache.allAppointments.push(newAppt);
-      closeModal('appt-modal');
+      // Resetear formulario y refrescar
+      set('appt-time','');
+      set('appt-notes','');
+      calSelectedDate = null;
+      calSelectedTime = null;
+      g('time-slots-wrap').style.display = 'none';
+      renderCalendar();
       toast('¡Turno reservado! Te esperamos ✨');
       renderMyAppts();
+      // Scroll a "Mis turnos reservados"
+      setTimeout(() => {
+        const el = document.querySelector('#my-appts');
+        if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+      }, 300);
     }catch(e){
       toast('Error: '+e.message, 'error');
       console.error(e);

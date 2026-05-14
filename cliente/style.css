@@ -656,3 +656,21 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent-light);backgro
   text-decoration:line-through;
   opacity:.5;
 }
+
+/* Calendario embebido en página de Turnos: más grande y aireado */
+#page-appointments .calendar{
+  background:transparent;
+  border:none;
+  box-shadow:none;
+  padding:0;
+}
+#page-appointments .cal-header{margin-bottom:16px}
+#page-appointments .cal-header span{font-size:18px}
+#page-appointments .cal-nav{width:38px;height:38px;font-size:22px}
+#page-appointments .cal-weekdays span{font-size:11px;padding:8px 0}
+#page-appointments .cal-day{font-size:14px;border-radius:12px}
+#page-appointments .time-slots{
+  grid-template-columns:repeat(auto-fill, minmax(90px,1fr));
+  gap:10px;
+}
+#page-appointments .time-slot{padding:12px 4px;font-size:14px}
