@@ -16,6 +16,21 @@
   <p id="loading-msg">Iniciando...</p>
 </div>
 
+<noscript><div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#e8f4f1;font-family:sans-serif;text-align:center;padding:40px"><div><h2 style="color:#2d5a4f">Lorenzza</h2><p>Necesitás habilitar JavaScript para usar esta página.</p></div></div></noscript>
+
+<script>
+  // Fallback: si en 8 segundos no se ejecutó el módulo, mostrar mensaje
+  window.__appLoaded = false;
+  setTimeout(function(){
+    if(!window.__appLoaded){
+      var l = document.getElementById('loading-screen');
+      if(l){
+        l.innerHTML = '<div style="text-align:center;padding:30px;color:#9a4f4f;font-family:sans-serif"><h3 style="margin-bottom:10px">No se pudo cargar la aplicación</h3><p style="font-size:13px">Verificá tu conexión a internet o probá recargar la página con Ctrl+Shift+R.</p><button onclick="location.reload()" style="margin-top:16px;padding:10px 20px;border-radius:50px;background:#5e9c91;color:#fff;border:none;cursor:pointer;font-weight:600">Recargar</button></div>';
+      }
+    }
+  }, 8000);
+</script>
+
 <div id="login-screen">
   <div class="login-box">
     <h1>Lorenzza</h1>
@@ -629,17 +644,37 @@
   });
 
   // ── INIT ──
-  const savedCfg = loadConfig();
-  if(savedCfg?.apiKey){
-    g('loading-msg').textContent = 'Conectando...';
-    initFirebase(savedCfg);
+  function startApp(){
+    window.__appLoaded = true;
+    try{
+      const savedCfg = loadConfig();
+      if(savedCfg?.apiKey){
+        g('loading-msg').textContent = 'Conectando...';
+        initFirebase(savedCfg);
+      } else {
+        hideLoading();
+        g('login-screen').classList.add('show');
+        window.doGoogleLogin = function(){
+          toast('Primero configurá Firebase','error');
+          setTimeout(()=>window.showConfigModal(), 300);
+        };
+      }
+    } catch(err){
+      console.error('Error iniciando app:', err);
+      hideLoading();
+      g('login-screen').classList.add('show');
+      const msg = document.createElement('div');
+      msg.style.cssText = 'position:fixed;top:20px;left:20px;right:20px;background:#fff;border:2px solid #d68a8a;padding:14px;border-radius:12px;z-index:9999;color:#9a4f4f;font-family:sans-serif;font-size:13px';
+      msg.innerHTML = '<b>Error al iniciar:</b><br>'+(err.message||err);
+      document.body.appendChild(msg);
+    }
+  }
+
+  // Esperar a que el DOM esté listo
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', startApp);
   } else {
-    hideLoading();
-    g('login-screen').classList.add('show');
-    window.doGoogleLogin = function(){
-      toast('Primero configurá Firebase','error');
-      setTimeout(()=>window.showConfigModal(), 300);
-    };
+    startApp();
   }
 </script>
 </body>
