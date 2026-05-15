@@ -366,7 +366,7 @@
   };
 
   // Inicializar la página de turnos: limpiar selección y poblar selects
-  function initApptPage(){
+  async function initApptPage(){
     set('appt-type','treatment');
     set('appt-service','');
     set('appt-date','');
@@ -378,6 +378,14 @@
     calSelectedTime = null;
     g('time-slots-wrap').style.display = 'none';
     renderCalendar();
+    // Refrescar turnos de Firestore para tener slots actualizados
+    try{
+      const appointments = await getAll('appointments');
+      cache.allAppointments = appointments;
+      cache.appointments = appointments.filter(a => a.clientId === currentClientId);
+      renderMyAppts();
+      renderCalendar();
+    }catch(e){ console.warn('No pude refrescar turnos:', e); }
   }
 
   window.onServiceChange = function(){
@@ -707,6 +715,32 @@
     if(!date){ toast('Elegí un día en el calendario','error'); return; }
     if(!time){ toast('Elegí un horario','error'); return; }
     try{
+      // VALIDACIÓN: verificar que el slot siga libre consultando Firestore en vivo
+      const q1 = query(
+        collection(db,'appointments'),
+        where('date','==',date),
+        where('startTime','==',time),
+        where('status','==','scheduled')
+      );
+      const snap = await getDocs(q1);
+      if(!snap.empty){
+        // Refrescar el cache para reflejar el slot tomado
+        snap.docs.forEach(d => {
+          const appt = {id:d.id, ...d.data()};
+          const idx = (cache.allAppointments||[]).findIndex(x => x.id === appt.id);
+          if(idx === -1){
+            if(!cache.allAppointments) cache.allAppointments = [];
+            cache.allAppointments.push(appt);
+          }
+        });
+        renderTimeSlots();
+        toast('Lo sentimos, ese horario fue reservado por otra persona. Elegí otro.','error');
+        // Limpiar selección de hora
+        calSelectedTime = null;
+        set('appt-time','');
+        return;
+      }
+
       const data = {
         date, startTime:time, endTime:'',
         status:'scheduled',
